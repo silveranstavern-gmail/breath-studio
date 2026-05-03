@@ -15,7 +15,9 @@ import com.ponderingsilver.breathstudio.domain.model.PracticeStageTarget
 import com.ponderingsilver.breathstudio.domain.model.PracticeStep
 import com.ponderingsilver.breathstudio.domain.model.toAuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.toDomainPracticeOrNull
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class AuthoredPracticeDto(
     val id: String,
     val title: String,
@@ -32,16 +34,19 @@ data class AuthoredPracticeDto(
     }
 }
 
+@Serializable
 data class AuthoredPracticeStageDto(
     val title: String = "",
     val target: AuthoredStageTargetDto = AuthoredStageTargetDto.rounds(1),
     val cycle: AuthoredPracticeCycleDto = AuthoredPracticeCycleDto(),
 )
 
+@Serializable
 data class AuthoredPracticeCycleDto(
     val steps: List<AuthoredPracticeStepDto> = emptyList(),
 )
 
+@Serializable
 data class AuthoredPracticeBlockDto(
     val kind: String,
     val title: String = "",
@@ -55,6 +60,7 @@ data class AuthoredPracticeBlockDto(
     }
 }
 
+@Serializable
 data class AuthoredPracticeStepDto(
     val actionName: String,
     val durationMillis: Long,
@@ -62,6 +68,7 @@ data class AuthoredPracticeStepDto(
     val routeName: String? = null,
 )
 
+@Serializable
 data class AuthoredBlockTargetDto(
     val kind: String,
     val value: Long,
@@ -82,6 +89,7 @@ data class AuthoredBlockTargetDto(
     }
 }
 
+@Serializable
 data class AuthoredStageTargetDto(
     val kind: String,
     val value: Int,

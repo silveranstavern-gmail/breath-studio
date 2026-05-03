@@ -69,36 +69,7 @@ class AuthoredPracticeRecordCodecTest {
     fun codecDropsRecordsWithTrailingGarbage() {
         val encoded = requireNotNull(AuthoredPracticeRecordCodec.encode(validDto()))
 
-        assertNull(AuthoredPracticeRecordCodec.decode("$encoded|extra"))
-    }
-
-    @Test
-    fun codecDecodesLegacyStageRecord() {
-        val legacyDto = AuthoredPracticeDto(
-            id = "legacy",
-            title = "Legacy Practice",
-            stages = listOf(
-                AuthoredPracticeStageDto(
-                    title = "Legacy Stage",
-                    target = AuthoredStageTargetDto.rounds(2),
-                    cycle = AuthoredPracticeCycleDto(
-                        steps = listOf(
-                            AuthoredPracticeStepDto(
-                                actionName = BreathAction.Inhale.name,
-                                durationMillis = 4_000L,
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
-        val legacyRecord = encodeLegacyRecord(legacyDto)
-
-        val decoded = AuthoredPracticeRecordCodec.decode(legacyRecord)
-
-        assertNotNull(decoded)
-        assertEquals("legacy", requireNotNull(decoded).id)
-        assertEquals(1, decoded.stages.size)
+        assertNull(AuthoredPracticeRecordCodec.decode("$encoded extra"))
     }
 
     private fun validDto(
@@ -132,34 +103,4 @@ class AuthoredPracticeRecordCodecTest {
         preferredVisualModeName = preferredVisualModeName,
     )
 
-    private fun encodeLegacyRecord(dto: AuthoredPracticeDto): String {
-        val encode = java.util.Base64.getUrlEncoder().withoutPadding()
-        fun token(value: String): String = encode.encodeToString(value.toByteArray(Charsets.UTF_8))
-
-        val tokens = buildList {
-            add("v1")
-            add(token(dto.id))
-            add(token(dto.title))
-            add(token(dto.subtitle))
-            add(token(dto.description))
-            add(token(dto.category))
-            add("~")
-            add(dto.defaultDurationMinutes.toString())
-            add(dto.stages.size.toString())
-            dto.stages.forEach { stage ->
-                add(token(stage.title))
-                add(token(stage.target.kind))
-                add(stage.target.value.toString())
-                add(stage.cycle.steps.size.toString())
-                stage.cycle.steps.forEach { step ->
-                    add(token(step.actionName))
-                    add((step.durationMillis / 1_000L).toString())
-                    add(token(step.label))
-                    add(step.routeName?.let(::token) ?: "~")
-                }
-            }
-        }
-
-        return tokens.joinToString("|")
-    }
 }

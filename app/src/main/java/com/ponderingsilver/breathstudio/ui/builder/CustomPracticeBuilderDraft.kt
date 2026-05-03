@@ -253,6 +253,71 @@ fun newEditableBlockFromTemplate(block: EditablePracticeBlock? = null): Editable
     )
 }
 
+fun CustomPracticeBuilderDraft.updateSelectedBlock(
+    transform: (EditablePracticeBlock) -> EditablePracticeBlock,
+): CustomPracticeBuilderDraft {
+    val updatedBlocks = blocks.map { block ->
+        if (block.id == selectedBlockId) transform(block) else block
+    }
+    return copy(blocks = updatedBlocks)
+}
+
+fun List<EditablePracticeBlock>.insertBlockAfter(
+    blockId: String,
+    newBlock: EditablePracticeBlock,
+): List<EditablePracticeBlock> {
+    val index = indexOfFirst { it.id == blockId }
+    if (index == -1) return this + newBlock
+    return toMutableList().apply {
+        add(index + 1, newBlock)
+    }
+}
+
+fun List<EditablePracticeBlock>.moveBlock(
+    blockId: String,
+    direction: Int,
+): List<EditablePracticeBlock> {
+    val currentIndex = indexOfFirst { it.id == blockId }
+    if (currentIndex == -1) return this
+    val targetIndex = (currentIndex + direction).coerceIn(0, lastIndex)
+    if (targetIndex == currentIndex) return this
+    return toMutableList().apply {
+        val item = removeAt(currentIndex)
+        add(targetIndex, item)
+    }
+}
+
+fun List<EditablePracticeStep>.replaceStep(
+    stepId: String,
+    transform: (EditablePracticeStep) -> EditablePracticeStep,
+): List<EditablePracticeStep> = map { step ->
+    if (step.id == stepId) transform(step) else step
+}
+
+fun List<EditablePracticeStep>.duplicateStepAfter(stepId: String): List<EditablePracticeStep> {
+    val index = indexOfFirst { it.id == stepId }
+    if (index == -1) return this
+    val step = this[index]
+    val duplicate = step.copy(id = UUID.randomUUID().toString())
+    return toMutableList().apply {
+        add(index + 1, duplicate)
+    }
+}
+
+fun List<EditablePracticeStep>.moveStep(
+    stepId: String,
+    direction: Int,
+): List<EditablePracticeStep> {
+    val currentIndex = indexOfFirst { it.id == stepId }
+    if (currentIndex == -1) return this
+    val targetIndex = (currentIndex + direction).coerceIn(0, lastIndex)
+    if (targetIndex == currentIndex) return this
+    return toMutableList().apply {
+        val item = removeAt(currentIndex)
+        add(targetIndex, item)
+    }
+}
+
 private fun parseDurationMillis(input: String): Long? {
     val seconds = input.trim().toDoubleOrNull() ?: return null
     if (seconds <= 0.0) return null

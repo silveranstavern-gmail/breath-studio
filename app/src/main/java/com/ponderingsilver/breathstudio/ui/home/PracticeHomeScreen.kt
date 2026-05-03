@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ponderingsilver.breathstudio.domain.model.BreathPractice
+import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 
 @Composable
 fun PracticeHomeScreen(
@@ -312,20 +313,5 @@ private fun PracticeCard(
                 SelectionPill(text = practice.preferredVisualMode.label)
             }
         }
-    }
-}
-
-@Composable
-private fun SelectionPill(text: String) {
-    Surface(
-        color = Color(0x18FFFFFF),
-        contentColor = Color(0xFFEFDDB4),
-        shape = RoundedCornerShape(999.dp),
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.labelLarge,
-        )
     }
 }

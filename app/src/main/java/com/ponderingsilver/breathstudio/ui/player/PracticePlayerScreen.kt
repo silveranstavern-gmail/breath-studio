@@ -1,7 +1,5 @@
 package com.ponderingsilver.breathstudio.ui.player
 
-import android.media.AudioManager
-import android.media.ToneGenerator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,19 +27,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -52,6 +46,7 @@ import com.ponderingsilver.breathstudio.domain.model.BreathAction
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 import com.ponderingsilver.breathstudio.domain.model.PlayerSessionState
 import com.ponderingsilver.breathstudio.domain.model.SessionStatus
+import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 import com.ponderingsilver.breathstudio.ui.visuals.BreathingVisual
 
 @Composable
@@ -61,24 +56,15 @@ fun PracticePlayerScreen(
     viewModel: PracticePlayerViewModel = viewModel(),
 ) {
     val sessionState by viewModel.sessionState.collectAsState()
-    val hapticFeedback = LocalHapticFeedback.current
-    val toneGenerator = rememberCueToneGenerator()
+    val cueController = rememberCueController(config.cues)
 
     LaunchedEffect(config) {
         viewModel.start(config)
     }
 
-    LaunchedEffect(viewModel, config.cues.soundEnabled, config.cues.hapticsEnabled, toneGenerator) {
+    LaunchedEffect(viewModel, cueController) {
         viewModel.cueEvents.collect { event ->
-            if (config.cues.hapticsEnabled) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-            }
-            if (config.cues.soundEnabled) {
-                when (event) {
-                    is PlayerCueEvent.StepStarted -> toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 90)
-                    PlayerCueEvent.SessionCompleted -> toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 120)
-                }
-            }
+            cueController.onCue(event)
         }
     }
 
@@ -148,23 +134,6 @@ fun PracticePlayerScreen(
             }
         }
     }
-}
-
-@Composable
-private fun rememberCueToneGenerator(): ToneGenerator? {
-    val toneGenerator = remember {
-        runCatching {
-            ToneGenerator(AudioManager.STREAM_MUSIC, 55)
-        }.getOrNull()
-    }
-
-    DisposableEffect(toneGenerator) {
-        onDispose {
-            toneGenerator?.release()
-        }
-    }
-
-    return toneGenerator
 }
 
 @Composable
@@ -381,21 +350,6 @@ private fun PlayerControls(
                 Text(if (sessionState.status == SessionStatus.Complete) "Back to practices" else "End practice")
             }
         }
-    }
-}
-
-@Composable
-private fun SelectionPill(text: String) {
-    Surface(
-        color = Color(0x18FFFFFF),
-        contentColor = Color(0xFFEFDDB4),
-        shape = RoundedCornerShape(999.dp),
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.labelLarge,
-        )
     }
 }
 

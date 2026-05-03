@@ -103,6 +103,21 @@ class PracticeRepositoryTest {
         assertEquals(listOf(1, 60), practice.stages.single().cycle.steps.map { it.safeDurationSeconds })
     }
 
+    @Test
+    fun repositoryExposesSavedEntriesAsEditableLibraryItems() = runBlocking {
+        val repository = DefaultPracticeRepository(
+            savedPracticeDtos = MutableStateFlow(
+                listOf(validDto(id = "editable-custom", title = "Editable Custom")),
+            ),
+        )
+
+        val entry = repository.entries.first().first { it.practice.safeId == "editable-custom" }
+
+        assertEquals(PracticeSource.Saved, entry.source)
+        assertTrue(entry.canEdit)
+        assertEquals("editable-custom", entry.authoredDefinition?.safeId)
+    }
+
     private fun validDto(
         id: String = "custom",
         title: String = "Custom Practice",
