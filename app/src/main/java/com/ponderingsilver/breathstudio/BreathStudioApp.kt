@@ -15,6 +15,7 @@ import com.ponderingsilver.breathstudio.ui.builder.CustomPracticeBuilderScreen
 import com.ponderingsilver.breathstudio.ui.home.PresetPickerScreen
 import com.ponderingsilver.breathstudio.ui.home.PracticeHomeScreen
 import com.ponderingsilver.breathstudio.ui.player.PracticePlayerScreen
+import com.ponderingsilver.breathstudio.ui.support.SupportScreen
 import com.ponderingsilver.breathstudio.ui.theme.BreathStudioTheme
 
 @Composable
@@ -49,7 +50,13 @@ fun BreathStudioApp(
                         onCopyPractice = appViewModel::copyPractice,
                         onEditPractice = appViewModel::editPractice,
                         onDeleteSelectedPractice = appViewModel::deleteSelectedPractice,
+                        onOpenSupport = appViewModel::openSupport,
                         canManageSelectedPractice = appState.selectedEntry?.canEdit == true,
+                    )
+                }
+                BreathStudioRoute.Support -> {
+                    SupportScreen(
+                        onBack = appViewModel::goHome,
                     )
                 }
                 BreathStudioRoute.PresetPicker -> {

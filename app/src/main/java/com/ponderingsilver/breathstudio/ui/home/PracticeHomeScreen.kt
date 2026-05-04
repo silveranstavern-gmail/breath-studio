@@ -57,6 +57,7 @@ fun PracticeHomeScreen(
     onCopyPractice: (String) -> Unit,
     onEditPractice: (String) -> Unit,
     onDeleteSelectedPractice: () -> Unit,
+    onOpenSupport: () -> Unit,
     canManageSelectedPractice: Boolean,
 ) {
     var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
@@ -104,6 +105,8 @@ fun PracticeHomeScreen(
                 .verticalScroll(scrollState),
         ) {
             HomeHero(selectedPractice = selectedPractice)
+            Spacer(modifier = Modifier.height(16.dp))
+            SupportIntroCard(onOpenSupport = onOpenSupport)
             Spacer(modifier = Modifier.height(24.dp))
             SectionTitle(
                 title = "Your library",
@@ -273,6 +276,52 @@ fun PracticeHomeScreen(
 }
 
 @Composable
+private fun SupportIntroCard(
+    onOpenSupport: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color(0x12FFFFFF),
+        contentColor = Color(0xFFF7F1E5),
+        shape = RoundedCornerShape(28.dp),
+        tonalElevation = 0.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x24FFFFFF)),
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Free, ad-free, and supported by care.",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFF8F4EA),
+            )
+            Text(
+                text = "While this app is free and doesn't use ads, we don't have UBI yet. Please consider supporting me if you found value in this app. I know many are struggling right now, so please give only if you're in a place of abundance right now.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xDCE7EFEC),
+                lineHeight = 21.sp,
+            )
+            Button(
+                onClick = onOpenSupport,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFECD7AB),
+                    contentColor = Color(0xFF153139),
+                ),
+            ) {
+                Text(
+                    text = "Support options",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun HomeHero(
     selectedPractice: BreathPractice?,
 ) {
@@ -293,7 +342,7 @@ private fun HomeHero(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(
-                text = "Breath Studio.",
+                text = "Breath Studio",
                 style = MaterialTheme.typography.displaySmall,
                 color = Color(0xFFF9F4E8),
                 lineHeight = 46.sp,

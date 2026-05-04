@@ -64,6 +64,10 @@ fun PracticePlayerScreen(
     }
 
     val state = sessionState ?: return
+    SessionPlayerPowerBehavior(
+        active = state.status == SessionStatus.Preparing || state.status == SessionStatus.Running,
+    )
+
     val accent = accentColorForPractice(config.practice.safeCategory)
     val phaseTint = colorFromHex(state.currentStep.colorHex)
 

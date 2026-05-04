@@ -78,6 +78,10 @@ class BreathStudioAppViewModel(
         route.value = BreathStudioRoute.PresetPicker
     }
 
+    fun openSupport() {
+        route.value = BreathStudioRoute.Support
+    }
+
     fun createCustomPractice() {
         route.value = BreathStudioRoute.Builder(initialDefinition = null)
     }
