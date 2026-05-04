@@ -1,6 +1,7 @@
 package com.ponderingsilver.breathstudio.data.practice
 
 import com.ponderingsilver.breathstudio.domain.model.PracticeStageTarget
+import com.ponderingsilver.breathstudio.domain.model.StepSound
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -98,6 +99,54 @@ class AuthoredPracticeDtosTest {
         )
     }
 
+    @Test
+    fun mapperPreservesExplicitStepSound() {
+        val practice = validDto(
+            blocks = listOf(
+                AuthoredPracticeBlockDto(
+                    kind = AuthoredPracticeBlockDto.KindRepeatingCycle,
+                    target = AuthoredBlockTargetDto.repetitions(1),
+                    cycle = AuthoredPracticeCycleDto(
+                        steps = listOf(
+                            AuthoredPracticeStepDto(
+                                durationMillis = 4_000L,
+                                label = "Custom cue",
+                                soundName = StepSound.Other1.name,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ).toDomainOrNull()
+
+        assertNotNull(practice)
+        assertEquals(StepSound.Other1, requireNotNull(practice).stages.first().cycle.steps.first().resolvedSound)
+    }
+
+    @Test
+    fun mapperFallsBackToLabelBasedSoundForUnknownStepSound() {
+        val practice = validDto(
+            blocks = listOf(
+                AuthoredPracticeBlockDto(
+                    kind = AuthoredPracticeBlockDto.KindRepeatingCycle,
+                    target = AuthoredBlockTargetDto.repetitions(1),
+                    cycle = AuthoredPracticeCycleDto(
+                        steps = listOf(
+                            AuthoredPracticeStepDto(
+                                durationMillis = 8_000L,
+                                label = "Long Exhale",
+                                soundName = "not-a-sound",
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ).toDomainOrNull()
+
+        assertNotNull(practice)
+        assertEquals(StepSound.Exhale, requireNotNull(practice).stages.first().cycle.steps.first().resolvedSound)
+    }
+
     private fun validDto(
         id: String = "custom",
         title: String = "Custom Practice",
@@ -125,4 +174,3 @@ class AuthoredPracticeDtosTest {
         defaultDurationMinutes = defaultDurationMinutes,
     )
 }
-

@@ -4,6 +4,15 @@ enum class BreathingVisualMode(val label: String) {
     Glow("Glow"),
 }
 
+enum class StepSound(val label: String) {
+    Default("Default"),
+    Inhale("Inhale"),
+    Exhale("Exhale"),
+    Hold("Hold"),
+    Other1("Other 1"),
+    Other2("Other 2"),
+}
+
 sealed interface SessionRunTarget {
     data class Timed(val durationMinutes: Int) : SessionRunTarget
     data class PracticeCycles(val cycles: Int) : SessionRunTarget
@@ -18,10 +27,12 @@ data class PracticeStep(
     val durationSeconds: Int,
     val label: String = "Step",
     val colorHex: String = defaultColorHexForLabel(label),
+    val sound: StepSound = StepSound.Default,
 ) {
     val safeDurationSeconds: Int = durationSeconds.coerceAtLeast(MinimumStepDurationSeconds)
     val safeLabel: String = label.trim().ifBlank { "Step" }
     val safeColorHex: String = normalizeColorHexOrDefault(colorHex, safeLabel)
+    val resolvedSound: StepSound = resolveStepSound(sound, safeLabel)
     val durationMillis: Long = safeDurationSeconds * 1_000L
 
     companion object {
@@ -93,6 +104,7 @@ data class ExecutableBreathStep(
     val label: String,
     val durationMillis: Long,
     val colorHex: String,
+    val sound: StepSound,
     val stageIndex: Int,
     val stageTitle: String,
     val roundInStage: Int,
@@ -210,4 +222,28 @@ fun normalizeColorHexOrNull(value: String?): String? {
 
 fun normalizeColorHexOrDefault(value: String?, label: String): String {
     return normalizeColorHexOrNull(value) ?: defaultColorHexForLabel(label)
+}
+
+fun resolveStepSound(sound: StepSound, label: String): StepSound {
+    if (sound != StepSound.Default) return sound
+    return defaultStepSoundForLabel(label)
+}
+
+fun defaultStepSoundForLabel(label: String): StepSound {
+    val key = label.trim().lowercase()
+    return when {
+        "inhale" in key -> StepSound.Inhale
+        "exhale" in key || "ease out" in key -> StepSound.Exhale
+        "hold" in key || "retention" in key -> StepSound.Hold
+        "rest" in key || "pause" in key || "recover" in key -> StepSound.Other1
+        else -> StepSound.Other2
+    }
+}
+
+fun parseStepSound(value: String?): StepSound {
+    val normalized = value?.trim().orEmpty()
+    return StepSound.entries.firstOrNull { sound ->
+        sound.name.equals(normalized, ignoreCase = true) ||
+            sound.label.equals(normalized, ignoreCase = true)
+    } ?: StepSound.Default
 }

@@ -21,11 +21,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,21 +41,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ponderingsilver.breathstudio.data.practice.PracticeLibraryEntry
 import com.ponderingsilver.breathstudio.domain.model.BreathPractice
 import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 
 @Composable
 fun PracticeHomeScreen(
-    practices: List<BreathPractice>,
+    entries: List<PracticeLibraryEntry>,
     selectedPractice: BreathPractice?,
     onPracticeSelected: (BreathPractice) -> Unit,
-    onStartSession: () -> Unit,
+    onStartSession: (BreathPractice) -> Unit,
     onAddPreset: () -> Unit,
     onCreateCustomPractice: () -> Unit,
-    onEditSelectedPractice: () -> Unit,
+    onEditPractice: (String) -> Unit,
     onDeleteSelectedPractice: () -> Unit,
     canManageSelectedPractice: Boolean,
 ) {
+    var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val backgroundBrush = remember {
         Brush.verticalGradient(
@@ -102,18 +108,34 @@ fun PracticeHomeScreen(
                 subtitle = "Saved sessions all run through the same flow. Add a preset, build your own, then edit or delete from here.",
             )
             Spacer(modifier = Modifier.height(14.dp))
-            if (practices.isEmpty()) {
+            if (entries.isEmpty()) {
                 EmptyLibraryCard(
                     title = "Your library is empty.",
                     subtitle = "Add a preset or create a custom session to start building it.",
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    practices.forEach { practice ->
+                    entries.forEach { entry ->
+                        val practice = entry.practice
+                        val isSelected = practice.safeId == selectedPractice?.safeId
                         PracticeCard(
                             practice = practice,
-                            selected = practice.safeId == selectedPractice?.safeId,
-                            onClick = { onPracticeSelected(practice) },
+                            selected = isSelected,
+                            canEdit = entry.canEdit,
+                            onClick = {
+                                onPracticeSelected(practice)
+                                if (!isSelected) showDeleteConfirmation = false
+                            },
+                            onBegin = if (isSelected) {
+                                { onStartSession(practice) }
+                            } else {
+                                null
+                            },
+                            onEdit = if (isSelected && entry.canEdit) {
+                                { onEditPractice(practice.safeId) }
+                            } else {
+                                null
+                            },
                         )
                     }
                 }
@@ -150,40 +172,63 @@ fun PracticeHomeScreen(
             }
             if (canManageSelectedPractice) {
                 Spacer(modifier = Modifier.height(10.dp))
-                Button(
-                    onClick = onEditSelectedPractice,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(26.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0x10FFFFFF),
-                        contentColor = Color(0xFFF7F1E5),
-                    ),
-                ) {
-                    Text(
-                        text = "Edit selected session",
-                        style = MaterialTheme.typography.titleSmall,
-                    )
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Button(
-                    onClick = onDeleteSelectedPractice,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(26.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0x14A84444),
-                        contentColor = Color(0xFFFFE1D7),
-                    ),
-                ) {
-                    Text(
-                        text = "Delete selected session",
-                        style = MaterialTheme.typography.titleSmall,
-                    )
+                if (showDeleteConfirmation) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        OutlinedButton(
+                            onClick = { showDeleteConfirmation = false },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(26.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = Color(0xFFF7F1E5),
+                            ),
+                        ) {
+                            Text(
+                                text = "Cancel delete",
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                onDeleteSelectedPractice()
+                                showDeleteConfirmation = false
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(26.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0x18A84444),
+                                contentColor = Color(0xFFFFE1D7),
+                            ),
+                        ) {
+                            Text(
+                                text = "Confirm delete",
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = { showDeleteConfirmation = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(26.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0x14A84444),
+                            contentColor = Color(0xFFFFE1D7),
+                        ),
+                    ) {
+                        Text(
+                            text = "Delete selected session",
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(26.dp))
             if (selectedPractice != null) {
                 Button(
-                    onClick = onStartSession,
+                    onClick = { onStartSession(selectedPractice) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(30.dp),
                     contentPadding = PaddingValues(vertical = 18.dp),
@@ -301,8 +346,10 @@ internal fun SectionTitle(
 internal fun PracticeCard(
     practice: BreathPractice,
     selected: Boolean,
+    canEdit: Boolean,
     onClick: () -> Unit,
-    trailingLabel: String = if (selected) "Selected" else practice.safeCategory,
+    onBegin: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null,
 ) {
     val accent = when (practice.safeCategory) {
         "Focus" -> Color(0xFF88D4D0)
@@ -350,7 +397,6 @@ internal fun PracticeCard(
                         color = accent,
                     )
                 }
-                SelectionPill(text = trailingLabel)
             }
             Text(
                 text = practice.safeDescription,
@@ -358,11 +404,40 @@ internal fun PracticeCard(
                 color = Color(0xDCE7EFEC),
                 lineHeight = 23.sp,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Bottom,
+            ) {
                 SelectionPill(text = "${practice.stages.size} stage${if (practice.stages.size == 1) "" else "s"}")
                 SelectionPill(text = practice.safeCategory)
+                if (onBegin != null) {
+                    ActionPillButton(text = "Begin", onClick = onBegin)
+                }
+                if (canEdit && onEdit != null) {
+                    ActionPillButton(text = "Edit", onClick = onEdit)
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun ActionPillButton(
+    text: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(Color(0x22FFFFFF))
+            .clickable(onClick = onClick),
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.labelLarge,
+            color = Color(0xFFF4DEB5),
+        )
     }
 }
 

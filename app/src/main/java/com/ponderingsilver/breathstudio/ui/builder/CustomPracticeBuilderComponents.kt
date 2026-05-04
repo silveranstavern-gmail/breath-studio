@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ponderingsilver.breathstudio.domain.model.defaultColorHexForLabel
 import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrNull
+import com.ponderingsilver.breathstudio.domain.model.StepSound
 import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 
 @Composable
@@ -148,7 +149,6 @@ fun BlockSummaryCard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -162,7 +162,6 @@ fun BlockSummaryCard(
                         color = Color(0xDDE6EFEC),
                     )
                 }
-                SelectionPill(text = if (selected) "Editing" else "Block ${index + 1}")
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 SelectionPill(
@@ -184,15 +183,17 @@ fun BlockSummaryCard(
                         Text("Down")
                     }
                 }
-                TextButton(onClick = onEdit, contentPadding = PaddingValues(0.dp)) {
-                    Text("Edit")
-                }
                 TextButton(onClick = onDuplicate, contentPadding = PaddingValues(0.dp)) {
                     Text("Copy")
                 }
                 if (canRemove) {
                     TextButton(onClick = onRemove, contentPadding = PaddingValues(0.dp)) {
                         Text("Remove")
+                    }
+                }
+                if (selected) {
+                    TextButton(onClick = onEdit, contentPadding = PaddingValues(0.dp)) {
+                        Text("Edit")
                     }
                 }
             }
@@ -210,6 +211,7 @@ fun StepEditorCard(
     onPresetSelected: (StepPreset) -> Unit,
     onLabelChanged: (String) -> Unit,
     onColorHexChanged: (String) -> Unit,
+    onSoundChanged: (StepSound) -> Unit,
     onDurationChanged: (String) -> Unit,
     onRemove: () -> Unit,
     onDuplicate: () -> Unit,
@@ -283,6 +285,33 @@ fun StepEditorCard(
                     Text("What the user sees during the session.")
                 }
             )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = "Step sound",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color(0xDDEBE6DA),
+                )
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    StepSound.entries.forEach { sound ->
+                        BuilderChoiceChip(
+                            title = sound.label,
+                            caption = when (sound) {
+                                StepSound.Default -> "Infer from label"
+                                StepSound.Inhale -> "Breath in"
+                                StepSound.Exhale -> "Breath out"
+                                StepSound.Hold -> "Hold cue"
+                                StepSound.Other1 -> "Soft cue A"
+                                StepSound.Other2 -> "Soft cue B"
+                            },
+                            selected = step.sound == sound,
+                            onClick = { onSoundChanged(sound) },
+                        )
+                    }
+                }
+            }
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

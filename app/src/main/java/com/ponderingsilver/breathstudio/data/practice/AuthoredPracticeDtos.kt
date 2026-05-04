@@ -11,6 +11,7 @@ import com.ponderingsilver.breathstudio.domain.model.PracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.PracticeStage
 import com.ponderingsilver.breathstudio.domain.model.PracticeStageTarget
 import com.ponderingsilver.breathstudio.domain.model.PracticeStep
+import com.ponderingsilver.breathstudio.domain.model.parseStepSound
 import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrDefault
 import com.ponderingsilver.breathstudio.domain.model.toAuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.toDomainPracticeOrNull
@@ -62,6 +63,7 @@ data class AuthoredPracticeStepDto(
     val durationMillis: Long,
     val label: String,
     val colorHex: String? = null,
+    val soundName: String? = null,
 )
 
 @Serializable
@@ -152,6 +154,7 @@ fun BreathPractice.toAuthoredDto(): AuthoredPracticeDto = AuthoredPracticeDto(
                         durationMillis = step.durationMillis,
                         label = step.safeLabel,
                         colorHex = step.safeColorHex,
+                        soundName = step.resolvedSound.name,
                     )
                 },
             ),
@@ -228,6 +231,7 @@ private fun AuthoredPracticeStepDto.toDomainOrNull(): PracticeStep? {
             .toInt(),
         label = safeLabel,
         colorHex = normalizeColorHexOrDefault(colorHex, safeLabel),
+        sound = parseStepSound(soundName),
     )
 }
 
@@ -237,6 +241,7 @@ private fun AuthoredPracticeStepDto.toAuthoredStepOrNull(): AuthoredPracticeStep
         durationMillis = durationMillis.coerceIn(MinimumStepDurationMillis, MaximumStepDurationMillis),
         label = safeLabel,
         colorHex = normalizeColorHexOrDefault(colorHex, safeLabel),
+        sound = parseStepSound(soundName),
     )
 }
 
@@ -244,6 +249,7 @@ private fun AuthoredPracticeStep.toDto(): AuthoredPracticeStepDto = AuthoredPrac
     durationMillis = safeDurationMillis,
     label = safeLabel,
     colorHex = safeColorHex,
+    soundName = sound.name,
 )
 
 private fun AuthoredBlockTargetDto.toDomainTarget(): AuthoredBlockTarget {

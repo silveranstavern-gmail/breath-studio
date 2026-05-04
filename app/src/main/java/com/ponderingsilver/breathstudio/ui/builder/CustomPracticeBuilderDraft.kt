@@ -6,6 +6,7 @@ import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeStep
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
+import com.ponderingsilver.breathstudio.domain.model.StepSound
 import com.ponderingsilver.breathstudio.domain.model.defaultColorHexForLabel
 import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrDefault
 import java.util.Locale
@@ -21,13 +22,14 @@ enum class BuilderTargetMode {
 data class StepPreset(
     val label: String,
     val colorHex: String,
+    val sound: StepSound,
 )
 
 val DefaultStepPresets: List<StepPreset> = listOf(
-    StepPreset(label = "Inhale", colorHex = "#7ED9C8"),
-    StepPreset(label = "Hold In", colorHex = "#E7C98C"),
-    StepPreset(label = "Exhale", colorHex = "#9BC1FF"),
-    StepPreset(label = "Hold Out", colorHex = "#C7D7D4"),
+    StepPreset(label = "Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+    StepPreset(label = "Hold In", colorHex = "#E7C98C", sound = StepSound.Hold),
+    StepPreset(label = "Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+    StepPreset(label = "Hold Out", colorHex = "#C7D7D4", sound = StepSound.Hold),
 )
 
 data class EditablePracticeStep(
@@ -35,6 +37,7 @@ data class EditablePracticeStep(
     val durationInput: String,
     val label: String = "",
     val colorHex: String = defaultColorHexForLabel(label),
+    val sound: StepSound = StepSound.Default,
 )
 
 data class EditablePracticeBlock(
@@ -76,6 +79,7 @@ fun defaultEditableSteps(): List<EditablePracticeStep> = DefaultStepPresets.mapI
         durationInput = "4",
         label = preset.label,
         colorHex = preset.colorHex,
+        sound = preset.sound,
     )
 }
 
@@ -115,6 +119,7 @@ fun AuthoredPracticeDefinition.toBuilderDraftOrNull(): CustomPracticeBuilderDraf
                     durationInput = formatSeconds(step.safeDurationMillis),
                     label = step.label,
                     colorHex = step.safeColorHex,
+                    sound = step.sound,
                 )
             },
         )
@@ -198,6 +203,7 @@ private fun EditablePracticeBlock.toAuthoredBlockOrNull(): AuthoredPracticeBlock
             durationMillis = durationMillis,
             label = safeLabel,
             colorHex = normalizeColorHexOrDefault(step.colorHex, safeLabel),
+            sound = step.sound,
         )
     }
     if (authoredSteps.isEmpty()) return null

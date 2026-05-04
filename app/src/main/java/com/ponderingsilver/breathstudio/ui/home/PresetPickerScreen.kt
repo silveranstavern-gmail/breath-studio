@@ -70,8 +70,8 @@ fun PresetPickerScreen(
                     PracticeCard(
                         practice = preset,
                         selected = false,
+                        canEdit = false,
                         onClick = { onAddPreset(preset) },
-                        trailingLabel = "Preset",
                     )
                     Button(
                         onClick = { onAddPreset(preset) },

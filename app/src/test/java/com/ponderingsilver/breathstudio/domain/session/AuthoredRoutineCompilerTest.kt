@@ -6,6 +6,7 @@ import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeStep
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
+import com.ponderingsilver.breathstudio.domain.model.StepSound
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -58,6 +59,32 @@ class AuthoredRoutineCompilerTest {
         assertEquals(listOf(0, 0, 1, 1, 2, 2), steps.map { it.roundInStage })
     }
 
+    @Test
+    fun compilerCarriesResolvedStepSounds() {
+        val steps = buildTemplateSteps(
+            definition = testDefinition(
+                blocks = listOf(
+                    AuthoredPracticeBlock.RepeatingCycle(
+                        title = "Audio",
+                        cycle = AuthoredPracticeCycle(
+                            steps = listOf(
+                                AuthoredPracticeStep(durationMillis = 1_000L, label = "Inhale"),
+                                AuthoredPracticeStep(
+                                    durationMillis = 1_000L,
+                                    label = "Custom cue",
+                                    sound = StepSound.Other2,
+                                ),
+                            ),
+                        ),
+                        target = AuthoredBlockTarget.Repetitions(1),
+                    ),
+                ),
+            ),
+        )
+
+        assertEquals(listOf(StepSound.Inhale, StepSound.Other2), steps.map { it.sound })
+    }
+
     private fun testDefinition(
         blocks: List<AuthoredPracticeBlock>,
     ): AuthoredPracticeDefinition = AuthoredPracticeDefinition(
@@ -70,4 +97,3 @@ class AuthoredRoutineCompilerTest {
         preferredVisualMode = BreathingVisualMode.Glow,
     )
 }
-

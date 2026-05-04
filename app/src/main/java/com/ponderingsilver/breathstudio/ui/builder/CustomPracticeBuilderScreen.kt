@@ -327,6 +327,7 @@ fun CustomPracticeBuilderScreen(
                                                 it.copy(
                                                     label = preset.label,
                                                     colorHex = preset.colorHex,
+                                                    sound = preset.sound,
                                                 )
                                             },
                                         ),
@@ -339,6 +340,16 @@ fun CustomPracticeBuilderScreen(
                                         steps = block.steps.replaceStep(
                                             stepId = step.id,
                                             transform = { it.copy(label = label) },
+                                        ),
+                                    )
+                                }
+                            },
+                            onSoundChanged = { sound ->
+                                draft = draft.updateSelectedBlock { block ->
+                                    block.copy(
+                                        steps = block.steps.replaceStep(
+                                            stepId = step.id,
+                                            transform = { it.copy(sound = sound) },
                                         ),
                                     )
                                 }
@@ -399,6 +410,7 @@ fun CustomPracticeBuilderScreen(
                                         label = nextPreset.label,
                                         durationInput = "4",
                                         colorHex = nextPreset.colorHex,
+                                        sound = nextPreset.sound,
                                     ),
                                 )
                             }

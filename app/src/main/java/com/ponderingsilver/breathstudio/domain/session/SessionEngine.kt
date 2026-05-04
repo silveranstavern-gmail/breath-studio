@@ -71,6 +71,7 @@ internal fun buildTemplateSteps(definition: AuthoredPracticeDefinition): List<Ex
                             label = step.safeLabel,
                             durationMillis = step.safeDurationMillis,
                             colorHex = step.safeColorHex,
+                            sound = step.resolvedSound,
                             stageIndex = blockIndex,
                             stageTitle = block.safeTitle,
                             roundInStage = roundIndex,

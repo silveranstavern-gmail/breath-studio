@@ -4,6 +4,7 @@ import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ponderingsilver.breathstudio.SessionConfig
+import com.ponderingsilver.breathstudio.domain.model.ExecutableBreathStep
 import com.ponderingsilver.breathstudio.domain.model.PlayerSessionState
 import com.ponderingsilver.breathstudio.domain.model.SessionStatus
 import com.ponderingsilver.breathstudio.domain.session.advanceSession
@@ -20,7 +21,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed interface PlayerCueEvent {
-    data class StepStarted(val stepIndex: Int) : PlayerCueEvent
+    data class StepStarted(val stepIndex: Int, val step: ExecutableBreathStep) : PlayerCueEvent
+    data object StepStopped : PlayerCueEvent
     data object SessionCompleted : PlayerCueEvent
 }
 
@@ -49,20 +51,33 @@ class PracticePlayerViewModel : ViewModel() {
             visualMode = config.visualMode,
         )
         _sessionState.value = newPlayerSession(plan)
-        emitCue(PlayerCueEvent.StepStarted(stepIndex = 0))
+        emitCue(PlayerCueEvent.StepStarted(stepIndex = 0, step = plan.steps.first()))
         startTicker()
     }
 
     fun pauseOrResume() {
         val current = _sessionState.value ?: return
-        _sessionState.value = when (current.status) {
-            SessionStatus.Running -> current.copy(status = SessionStatus.Paused)
-            SessionStatus.Paused -> current.copy(status = SessionStatus.Running)
+        val nextState = when (current.status) {
+            SessionStatus.Running -> {
+                emitCue(PlayerCueEvent.StepStopped)
+                current.copy(status = SessionStatus.Paused)
+            }
+            SessionStatus.Paused -> {
+                val resumed = current.copy(status = SessionStatus.Running)
+                emitCue(
+                    PlayerCueEvent.StepStarted(
+                        stepIndex = resumed.currentStepIndex,
+                        step = resumed.currentStep.copy(durationMillis = resumed.remainingStepMillis),
+                    ),
+                )
+                resumed
+            }
             SessionStatus.Complete -> {
-                emitCue(PlayerCueEvent.StepStarted(stepIndex = 0))
+                emitCue(PlayerCueEvent.StepStarted(stepIndex = 0, step = current.plan.steps.first()))
                 newPlayerSession(current.plan)
             }
         }
+        _sessionState.value = nextState
         if (_sessionState.value?.status == SessionStatus.Running) {
             startTicker()
         } else {
@@ -73,7 +88,7 @@ class PracticePlayerViewModel : ViewModel() {
     fun restart() {
         val current = _sessionState.value ?: return
         _sessionState.value = newPlayerSession(current.plan)
-        emitCue(PlayerCueEvent.StepStarted(stepIndex = 0))
+        emitCue(PlayerCueEvent.StepStarted(stepIndex = 0, step = current.plan.steps.first()))
         startTicker()
     }
 
@@ -96,7 +111,12 @@ class PracticePlayerViewModel : ViewModel() {
                 val current = _sessionState.value ?: break
                 val advanced = advanceSession(current, deltaMillis)
                 if (advanced.currentStepIndex != current.currentStepIndex && advanced.status != SessionStatus.Complete) {
-                    emitCue(PlayerCueEvent.StepStarted(advanced.currentStepIndex))
+                    emitCue(
+                        PlayerCueEvent.StepStarted(
+                            stepIndex = advanced.currentStepIndex,
+                            step = advanced.currentStep,
+                        ),
+                    )
                 }
                 if (advanced.status == SessionStatus.Complete && current.status != SessionStatus.Complete) {
                     emitCue(PlayerCueEvent.SessionCompleted)

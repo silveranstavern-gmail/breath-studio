@@ -1,6 +1,5 @@
 package com.ponderingsilver.breathstudio.data.practice
 
-import com.ponderingsilver.breathstudio.domain.model.BuiltInPractices
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -11,10 +10,10 @@ import org.junit.Test
 
 class PracticeRepositoryTest {
     @Test
-    fun repositoryMergesSavedPracticesAndDropsBuiltInIdCollisions() = runBlocking {
+    fun repositoryExposesOnlySavedPracticesAndDedupeById() = runBlocking {
         val savedDtos = MutableStateFlow(
             listOf(
-                validDto(id = BuiltInPractices.BoxBreathing.safeId, title = "Shadow Box"),
+                validDto(id = "custom-one", title = "Custom One"),
                 validDto(id = "custom-one", title = "Custom One"),
             ),
         )
@@ -22,13 +21,12 @@ class PracticeRepositoryTest {
 
         val practices = repository.practices.first()
 
-        assertTrue(practices.any { it.safeId == BuiltInPractices.BoxBreathing.safeId && it.safeTitle != "Shadow Box" })
         assertTrue(practices.any { it.safeId == "custom-one" })
-        assertEquals(practices.size, practices.map { it.safeId }.toSet().size)
+        assertEquals(1, practices.size)
     }
 
     @Test
-    fun repositoryFallsBackWhenSavedPracticesAreEmptyOrInvalid() = runBlocking {
+    fun repositoryStartsEmptyWhenSavedPracticesAreEmptyOrInvalid() = runBlocking {
         val repository = DefaultPracticeRepository(
             savedPracticeDtos = MutableStateFlow(
                 listOf(validDto(id = "   ")),
@@ -37,7 +35,7 @@ class PracticeRepositoryTest {
 
         val practices = repository.practices.first()
 
-        assertTrue(practices.any { it.safeId == BuiltInPractices.BoxBreathing.safeId })
+        assertTrue(practices.isEmpty())
     }
 
     @Test
@@ -102,4 +100,3 @@ class PracticeRepositoryTest {
         blocks = blocks,
     )
 }
-

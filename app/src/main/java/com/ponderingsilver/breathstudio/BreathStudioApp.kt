@@ -2,6 +2,7 @@ package com.ponderingsilver.breathstudio
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +26,11 @@ fun BreathStudioApp(
         factory = BreathStudioAppViewModelFactory(appContainer),
     )
     val appState by appViewModel.appState.collectAsState()
+    val isOnHomeRoute = appState.route == BreathStudioRoute.Home
+
+    BackHandler(enabled = !isOnHomeRoute) {
+        appViewModel.goHome()
+    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Crossfade(
@@ -34,13 +40,13 @@ fun BreathStudioApp(
             when (currentRoute) {
                 BreathStudioRoute.Home -> {
                     PracticeHomeScreen(
-                        practices = appState.practices,
+                        entries = appState.entries,
                         selectedPractice = appState.selectedEntry?.practice,
                         onPracticeSelected = appViewModel::selectPractice,
-                        onStartSession = appViewModel::startSelectedPractice,
+                        onStartSession = appViewModel::startPractice,
                         onAddPreset = appViewModel::openPresetPicker,
                         onCreateCustomPractice = appViewModel::createCustomPractice,
-                        onEditSelectedPractice = appViewModel::editSelectedPractice,
+                        onEditPractice = appViewModel::editPractice,
                         onDeleteSelectedPractice = appViewModel::deleteSelectedPractice,
                         canManageSelectedPractice = appState.selectedEntry?.canEdit == true,
                     )

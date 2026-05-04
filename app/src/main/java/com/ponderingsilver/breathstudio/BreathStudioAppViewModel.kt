@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ponderingsilver.breathstudio.data.practice.PracticeLibraryEntry
+import com.ponderingsilver.breathstudio.data.practice.AuthoredPracticeDto
 import com.ponderingsilver.breathstudio.data.practice.toAuthoredDto
 import com.ponderingsilver.breathstudio.data.preferences.UserPreferences
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 data class BreathStudioAppState(
     val route: BreathStudioRoute = BreathStudioRoute.Home,
@@ -41,9 +43,7 @@ class BreathStudioAppViewModel(
             route = currentRoute,
             entries = libraryEntries,
             selectedEntry = selectedEntry,
-            availablePresets = BuiltInPractices.all.filterNot { preset ->
-                libraryEntries.any { entry -> entry.practice.safeId == preset.safeId }
-            },
+            availablePresets = BuiltInPractices.all,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -59,9 +59,11 @@ class BreathStudioAppViewModel(
 
     fun startSelectedPractice() {
         val selectedPractice = appState.value.selectedEntry?.practice ?: return
-        route.value = BreathStudioRoute.Player(
-            config = SessionConfig.fromPractice(selectedPractice),
-        )
+        startPractice(selectedPractice)
+    }
+
+    fun startPractice(practice: BreathPractice) {
+        route.value = BreathStudioRoute.Player(config = SessionConfig.fromPractice(practice))
     }
 
     fun openPresetPicker() {
@@ -74,6 +76,14 @@ class BreathStudioAppViewModel(
 
     fun editSelectedPractice() {
         val authoredDefinition = appState.value.selectedEntry?.authoredDefinition ?: return
+        editPractice(authoredDefinition.safeId)
+    }
+
+    fun editPractice(practiceId: String) {
+        val authoredDefinition = appState.value.entries
+            .firstOrNull { entry -> entry.practice.safeId == practiceId }
+            ?.authoredDefinition
+            ?: return
         route.value = BreathStudioRoute.Builder(
             initialDefinition = authoredDefinition,
         )
@@ -81,9 +91,10 @@ class BreathStudioAppViewModel(
 
     fun addPresetToLibrary(practice: BreathPractice) {
         viewModelScope.launch {
-            val saved = appContainer.savedPracticeStore.upsertPractice(practice.toAuthoredDto())
+            val dto = practice.toTemplateCopyDto()
+            val saved = appContainer.savedPracticeStore.upsertPractice(dto)
             if (saved) {
-                appContainer.userPreferencesRepository.setSelectedPracticeId(practice.safeId)
+                appContainer.userPreferencesRepository.setSelectedPracticeId(dto.id)
                 route.value = BreathStudioRoute.Home
             }
         }
@@ -123,6 +134,16 @@ class BreathStudioAppViewModel(
             ?: firstOrNull()
     }
 }
+
+private fun BreathPractice.toTemplateCopyDto(): AuthoredPracticeDto {
+    val base = safeId
+        .ifBlank { "preset" }
+        .take(MaxTemplateBaseIdLength)
+    val suffix = UUID.randomUUID().toString().replace("-", "").take(12)
+    return toAuthoredDto().copy(id = "$base-$suffix")
+}
+
+private const val MaxTemplateBaseIdLength = 96
 
 class BreathStudioAppViewModelFactory(
     private val appContainer: BreathStudioAppContainer,

@@ -9,10 +9,12 @@ data class AuthoredPracticeStep(
     val durationMillis: Long,
     val label: String = "Step",
     val colorHex: String = defaultColorHexForLabel(label),
+    val sound: StepSound = StepSound.Default,
 ) {
     val safeDurationMillis: Long = durationMillis.coerceAtLeast(MinimumDurationMillis)
     val safeLabel: String = label.trim().ifBlank { "Step" }
     val safeColorHex: String = normalizeColorHexOrDefault(colorHex, safeLabel)
+    val resolvedSound: StepSound = resolveStepSound(sound, safeLabel)
 
     companion object {
         const val MinimumDurationMillis: Long = 100L
@@ -105,6 +107,7 @@ fun BreathPractice.toAuthoredPracticeDefinition(): AuthoredPracticeDefinition = 
                         durationMillis = step.durationMillis,
                         label = step.safeLabel,
                         colorHex = step.safeColorHex,
+                        sound = step.resolvedSound,
                     )
                 },
             ),
@@ -148,6 +151,7 @@ private fun AuthoredPracticeStep.toPracticeStep(): PracticeStep = PracticeStep(
         .toInt(),
     label = safeLabel,
     colorHex = safeColorHex,
+    sound = sound,
 )
 
 private fun ceilDiv(value: Long, divisor: Long): Long = (value + divisor - 1L) / divisor
