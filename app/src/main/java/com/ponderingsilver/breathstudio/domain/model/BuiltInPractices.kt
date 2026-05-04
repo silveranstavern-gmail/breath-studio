@@ -330,7 +330,34 @@ object BuiltInPractices {
         defaultDurationMinutes = 15,
     )
 
+    val Sounds = BreathPractice(
+        id = "sounds",
+        title = "Sounds",
+        subtitle = "Step sound reference",
+        description = "A simple two-round reference preset for auditioning every built-in step sound.",
+        category = "Utility",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Sound cycle",
+                target = PracticeStageTarget.Rounds(2),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Default", colorHex = "#D7CFAF", sound = StepSound.Default),
+                        PracticeStep(durationSeconds = 8, label = "In", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 8, label = "Out", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 4, label = "Hold", colorHex = "#E7C98C", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 4, label = "Other 1", colorHex = "#C8B6FF", sound = StepSound.Other1),
+                        PracticeStep(durationSeconds = 4, label = "Other 2", colorHex = "#BFC9D4", sound = StepSound.Other2),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 2,
+    )
+
     val all: List<BreathPractice> = listOf(
+        Sounds,
         FourSevenEight,
         ExtendedExhale,
         NadiShodhanaL3,

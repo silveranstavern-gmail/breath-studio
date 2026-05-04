@@ -12,14 +12,33 @@ class BuiltInPracticesTest {
         presets.forEach { practice ->
             practice.stages.forEach { stage ->
                 stage.cycle.steps.forEach { step ->
-                    assertNotEquals(
-                        "${practice.safeTitle} / ${stage.safeTitle} / ${step.safeLabel}",
-                        StepSound.Default,
-                        step.sound,
-                    )
+                    val explicitDefaultAllowed = practice.id == BuiltInPractices.Sounds.id && step.safeLabel == "Default"
+                    if (!explicitDefaultAllowed) {
+                        assertNotEquals(
+                            "${practice.safeTitle} / ${stage.safeTitle} / ${step.safeLabel}",
+                            StepSound.Default,
+                            step.sound,
+                        )
+                    }
                 }
             }
         }
+    }
+
+    @Test
+    fun soundsPresetAuditionsEveryStepSoundForTwoRounds() {
+        val stage = BuiltInPractices.Sounds.stages.single()
+        val steps = stage.cycle.steps
+
+        assertEquals(PracticeStageTarget.Rounds(2), stage.target)
+        assertEquals(
+            listOf(StepSound.Default, StepSound.Inhale, StepSound.Exhale, StepSound.Hold, StepSound.Other1, StepSound.Other2),
+            steps.map { it.sound },
+        )
+        assertEquals(
+            listOf(4, 8, 8, 4, 4, 4),
+            steps.map { it.durationSeconds },
+        )
     }
 
     @Test
