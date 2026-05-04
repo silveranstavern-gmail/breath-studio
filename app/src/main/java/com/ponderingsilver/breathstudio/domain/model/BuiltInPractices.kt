@@ -6,7 +6,7 @@ object BuiltInPractices {
         title = "Box Breathing",
         subtitle = "Steady focus",
         description = "A four-sided breath for balance and concentration, guided by a soft visual glow.",
-        category = "Focus",
+        category = "Reset",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -29,7 +29,7 @@ object BuiltInPractices {
         title = "4-7-8",
         subtitle = "Long release",
         description = "A classic calming ratio with a longer hold and a fuller exhale.",
-        category = "Calm",
+        category = "Calming",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -73,7 +73,7 @@ object BuiltInPractices {
         title = "Exhale Ladder",
         subtitle = "Stage-based downshift",
         description = "A progressive practice that lengthens the exhale over three stages without changing the inhale.",
-        category = "Sleep",
+        category = "Calming",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -115,7 +115,7 @@ object BuiltInPractices {
         title = "Nadi Shodhana L3",
         subtitle = "Alternate nostril balance",
         description = "A full alternate-nostril cycle with equal inhale, inner hold, exhale, and outer hold. Keep the count smooth and unforced.",
-        category = "Calm",
+        category = "Reset",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -143,7 +143,7 @@ object BuiltInPractices {
         title = "Nadi Shodhana L4",
         subtitle = "Alternate nostril retention ladder",
         description = "A longer-hold alternate nostril cycle with steady 5 second inhales and exhales, then 10 second inner and outer retentions.",
-        category = "Focus",
+        category = "Reset",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -171,7 +171,7 @@ object BuiltInPractices {
         title = "Nadi Shodhana L5",
         subtitle = "Extended alternate nostril holds",
         description = "A deeper alternate nostril round with longer retentions and a fuller exhale. Only use this level if the breath stays smooth and controlled.",
-        category = "Sleep",
+        category = "Calming",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -199,7 +199,7 @@ object BuiltInPractices {
         title = "Left Nostril / Moon",
         subtitle = "Cooling nasal downshift",
         description = "A single-side nasal practice that stays simple while still giving users a nostril-specific template to modify.",
-        category = "Sleep",
+        category = "Calming",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -223,7 +223,7 @@ object BuiltInPractices {
         title = "Right Nostril / Sun",
         subtitle = "Brightening nasal focus",
         description = "A one-sided activating nasal pattern that works as a reusable template for energizing focus sessions.",
-        category = "Focus",
+        category = "Energizing",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -247,7 +247,7 @@ object BuiltInPractices {
         title = "Bhramari",
         subtitle = "Humming exhale meditation",
         description = "A calming humming-breath template with a long resonant exhale and a gentle pause between rounds.",
-        category = "Calm",
+        category = "Calming",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -270,7 +270,7 @@ object BuiltInPractices {
         title = "Ujjayi",
         subtitle = "Ocean-breath concentration",
         description = "A steady ocean-breath rhythm with matched inhale and exhale, useful as a strong base template for meditative pacing.",
-        category = "Focus",
+        category = "Reset",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
@@ -292,7 +292,7 @@ object BuiltInPractices {
         title = "Power Breath + Retention",
         subtitle = "Staged energize and reset template",
         description = "A multi-stage power-breath routine with rhythmic active breathing, a long exhale hold, and a short recovery hold. This is intentionally structured as a more advanced template to tweak.",
-        category = "Custom",
+        category = "Energizing",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(

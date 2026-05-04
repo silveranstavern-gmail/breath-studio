@@ -342,8 +342,8 @@ private fun PlayerControls(
 }
 
 private fun accentColorForPractice(category: String): Color = when (category) {
-    "Focus" -> Color(0xFF80D4D0)
-    "Sleep" -> Color(0xFFD5B27A)
+    "Calming" -> Color(0xFFD5B27A)
+    "Energizing" -> Color(0xFF80D4D0)
     "Reset" -> Color(0xFF80D2AC)
     else -> Color(0xFF9CCBE9)
 }

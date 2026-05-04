@@ -352,8 +352,8 @@ internal fun PracticeCard(
     onEdit: (() -> Unit)? = null,
 ) {
     val accent = when (practice.safeCategory) {
-        "Focus" -> Color(0xFF88D4D0)
-        "Sleep" -> Color(0xFFD9B784)
+        "Calming" -> Color(0xFFD9B784)
+        "Energizing" -> Color(0xFF88D4D0)
         "Reset" -> Color(0xFF7FD0AA)
         else -> Color(0xFFB2D4F1)
     }

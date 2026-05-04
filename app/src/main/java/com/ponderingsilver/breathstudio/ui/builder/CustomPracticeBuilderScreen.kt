@@ -101,7 +101,7 @@ fun CustomPracticeBuilderScreen(
             }
             BuilderSection(
                 title = "Library details",
-                subtitle = "These are the labels the library uses, so presets and custom sessions can carry the same kind of metadata.",
+                subtitle = "Use an intention label that fits how the session should feel in the library.",
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(
@@ -124,8 +124,8 @@ fun CustomPracticeBuilderScreen(
                         onValueChange = { draft = draft.copy(category = it) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        label = { Text("Category") },
-                        placeholder = { Text("Focus, Sleep, Reset, Custom...") },
+                        label = { Text("Intention") },
+                        placeholder = { Text("Calming, Energizing, Reset...") },
                     )
                     OutlinedTextField(
                         value = draft.subtitle,

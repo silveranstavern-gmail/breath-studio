@@ -60,11 +60,9 @@ data class CustomPracticeBuilderDraft(
 )
 
 val DefaultPracticeCategories: List<String> = listOf(
-    "Focus",
-    "Calm",
+    "Calming",
+    "Energizing",
     "Reset",
-    "Sleep",
-    "Custom",
 )
 
 val CustomPracticeBuilderDraft.hasExistingPractice: Boolean
@@ -148,7 +146,7 @@ fun CustomPracticeBuilderDraft.toAuthoredPracticeDefinitionOrNull(
         title = practiceTitle,
         subtitle = subtitle.trim().ifBlank { draftSubtitle(authoredBlocks) },
         description = description.trim().ifBlank { draftDescription(authoredBlocks) },
-        category = category.trim().ifBlank { "Custom" },
+        category = category.trim().ifBlank { DefaultPracticeCategories.first() },
         blocks = authoredBlocks,
         preferredVisualMode = visualMode,
         defaultDurationMinutes = suggestedDefaultDurationMinutes(authoredBlocks),

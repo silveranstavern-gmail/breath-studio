@@ -67,7 +67,7 @@ class CustomPracticeBuilderDraftTest {
             title = "Custom Box",
             subtitle = "Existing",
             description = "Existing practice",
-            category = "Custom",
+            category = "Calming",
             blocks = listOf(
                 AuthoredPracticeBlock.RepeatingCycle(
                     title = "Settle",
@@ -198,4 +198,3 @@ class CustomPracticeBuilderDraftTest {
         assertEquals("3600", adjustDurationInputBySeconds("999999", 1))
     }
 }
-
