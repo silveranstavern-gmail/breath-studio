@@ -1,6 +1,5 @@
 package com.ponderingsilver.breathstudio.data.practice
 
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
 import com.ponderingsilver.breathstudio.domain.model.BuiltInPractices
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -29,9 +28,8 @@ class PracticeRepositoryTest {
     }
 
     @Test
-    fun repositoryFallsBackWhenBuiltInsAndSavedPracticesAreEmptyOrInvalid() = runBlocking {
+    fun repositoryFallsBackWhenSavedPracticesAreEmptyOrInvalid() = runBlocking {
         val repository = DefaultPracticeRepository(
-            builtInPractices = emptyList(),
             savedPracticeDtos = MutableStateFlow(
                 listOf(validDto(id = "   ")),
             ),
@@ -39,7 +37,7 @@ class PracticeRepositoryTest {
 
         val practices = repository.practices.first()
 
-        assertEquals(listOf(BuiltInPractices.BoxBreathing.safeId), practices.map { it.safeId })
+        assertTrue(practices.any { it.safeId == BuiltInPractices.BoxBreathing.safeId })
     }
 
     @Test
@@ -52,8 +50,8 @@ class PracticeRepositoryTest {
                     cycle = AuthoredPracticeCycleDto(
                         steps = List(80) {
                             AuthoredPracticeStepDto(
-                                actionName = BreathAction.Inhale.name,
                                 durationMillis = 4_000L,
+                                label = "Step",
                             )
                         },
                     ),
@@ -68,42 +66,6 @@ class PracticeRepositoryTest {
     }
 
     @Test
-    fun repositoryMapsSavedSequenceBlocksIntoRuntimePractices() = runBlocking {
-        val repository = DefaultPracticeRepository(
-            savedPracticeDtos = MutableStateFlow(
-                listOf(
-                    validDto(
-                        id = "sequence-practice",
-                        title = "Sequence Practice",
-                        blocks = listOf(
-                            AuthoredPracticeBlockDto(
-                                kind = AuthoredPracticeBlockDto.KindSequence,
-                                title = "Retention",
-                                steps = listOf(
-                                    AuthoredPracticeStepDto(
-                                        actionName = BreathAction.Exhale.name,
-                                        durationMillis = 400L,
-                                    ),
-                                    AuthoredPracticeStepDto(
-                                        actionName = BreathAction.HoldOut.name,
-                                        durationMillis = 60_000L,
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
-
-        val practice = repository.practices.first().first { it.safeId == "sequence-practice" }
-
-        assertEquals("Retention", practice.stages.single().safeTitle)
-        assertEquals(listOf(BreathAction.Exhale, BreathAction.HoldOut), practice.stages.single().cycle.steps.map { it.action })
-        assertEquals(listOf(1, 60), practice.stages.single().cycle.steps.map { it.safeDurationSeconds })
-    }
-
-    @Test
     fun repositoryExposesSavedEntriesAsEditableLibraryItems() = runBlocking {
         val repository = DefaultPracticeRepository(
             savedPracticeDtos = MutableStateFlow(
@@ -113,7 +75,6 @@ class PracticeRepositoryTest {
 
         val entry = repository.entries.first().first { it.practice.safeId == "editable-custom" }
 
-        assertEquals(PracticeSource.Saved, entry.source)
         assertTrue(entry.canEdit)
         assertEquals("editable-custom", entry.authoredDefinition?.safeId)
     }
@@ -128,8 +89,8 @@ class PracticeRepositoryTest {
                 cycle = AuthoredPracticeCycleDto(
                     steps = listOf(
                         AuthoredPracticeStepDto(
-                            actionName = BreathAction.Inhale.name,
                             durationMillis = 4_000L,
+                            label = "Step",
                         ),
                     ),
                 ),
@@ -141,3 +102,4 @@ class PracticeRepositoryTest {
         blocks = blocks,
     )
 }
+

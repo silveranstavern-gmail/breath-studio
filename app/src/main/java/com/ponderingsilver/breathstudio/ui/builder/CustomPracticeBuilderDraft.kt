@@ -5,9 +5,9 @@ import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeBlock
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeStep
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
-import com.ponderingsilver.breathstudio.domain.model.BreathRoute
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
+import com.ponderingsilver.breathstudio.domain.model.defaultColorHexForLabel
+import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrDefault
 import java.util.Locale
 import java.util.UUID
 import kotlin.math.ceil
@@ -18,10 +18,23 @@ enum class BuilderTargetMode {
     Repetitions,
 }
 
+data class StepPreset(
+    val label: String,
+    val colorHex: String,
+)
+
+val DefaultStepPresets: List<StepPreset> = listOf(
+    StepPreset(label = "Inhale", colorHex = "#7ED9C8"),
+    StepPreset(label = "Hold In", colorHex = "#E7C98C"),
+    StepPreset(label = "Exhale", colorHex = "#9BC1FF"),
+    StepPreset(label = "Hold Out", colorHex = "#C7D7D4"),
+)
+
 data class EditablePracticeStep(
     val id: String,
-    val action: BreathAction,
     val durationInput: String,
+    val label: String = "",
+    val colorHex: String = defaultColorHexForLabel(label),
 )
 
 data class EditablePracticeBlock(
@@ -35,7 +48,7 @@ data class EditablePracticeBlock(
 data class CustomPracticeBuilderDraft(
     val practiceId: String? = null,
     val title: String = "",
-    val visualMode: BreathingVisualMode = BreathingVisualMode.Circle,
+    val visualMode: BreathingVisualMode = BreathingVisualMode.Glow,
     val blocks: List<EditablePracticeBlock> = listOf(defaultEditableBlock()),
     val selectedBlockId: String = blocks.first().id,
 )
@@ -46,28 +59,14 @@ val CustomPracticeBuilderDraft.hasExistingPractice: Boolean
 val CustomPracticeBuilderDraft.selectedBlock: EditablePracticeBlock
     get() = blocks.firstOrNull { it.id == selectedBlockId } ?: blocks.first()
 
-fun defaultEditableSteps(): List<EditablePracticeStep> = listOf(
+fun defaultEditableSteps(): List<EditablePracticeStep> = DefaultStepPresets.mapIndexed { index, preset ->
     EditablePracticeStep(
-        id = "step-inhale",
-        action = BreathAction.Inhale,
+        id = "step-$index-${preset.label.lowercase().replace(' ', '-')}",
         durationInput = "4",
-    ),
-    EditablePracticeStep(
-        id = "step-hold-in",
-        action = BreathAction.HoldIn,
-        durationInput = "4",
-    ),
-    EditablePracticeStep(
-        id = "step-exhale",
-        action = BreathAction.Exhale,
-        durationInput = "4",
-    ),
-    EditablePracticeStep(
-        id = "step-hold-out",
-        action = BreathAction.HoldOut,
-        durationInput = "4",
-    ),
-)
+        label = preset.label,
+        colorHex = preset.colorHex,
+    )
+}
 
 fun defaultEditableBlock(): EditablePracticeBlock = EditablePracticeBlock(
     id = "block-main",
@@ -77,12 +76,11 @@ fun defaultEditableBlock(): EditablePracticeBlock = EditablePracticeBlock(
     steps = defaultEditableSteps(),
 )
 
-fun nextSuggestedAction(previous: BreathAction?): BreathAction = when (previous) {
-    BreathAction.Inhale -> BreathAction.Exhale
-    BreathAction.Exhale -> BreathAction.Inhale
-    BreathAction.HoldIn -> BreathAction.Exhale
-    BreathAction.HoldOut -> BreathAction.Inhale
-    BreathAction.Rest, null -> BreathAction.Inhale
+fun nextSuggestedPreset(previousLabel: String?): StepPreset {
+    val normalized = previousLabel?.trim()?.lowercase().orEmpty()
+    val previousIndex = DefaultStepPresets.indexOfFirst { it.label.lowercase() == normalized }
+    val nextIndex = if (previousIndex == -1) 0 else (previousIndex + 1) % DefaultStepPresets.size
+    return DefaultStepPresets[nextIndex]
 }
 
 fun AuthoredPracticeDefinition.toBuilderDraftOrNull(): CustomPracticeBuilderDraft? {
@@ -103,8 +101,9 @@ fun AuthoredPracticeDefinition.toBuilderDraftOrNull(): CustomPracticeBuilderDraf
             steps = repeatingBlock.cycle.steps.mapIndexed { stepIndex, step ->
                 EditablePracticeStep(
                     id = "${safeId}-block-$index-step-$stepIndex",
-                    action = step.action,
                     durationInput = formatSeconds(step.safeDurationMillis),
+                    label = step.label,
+                    colorHex = step.safeColorHex,
                 )
             },
         )
@@ -140,7 +139,8 @@ fun CustomPracticeBuilderDraft.toAuthoredPracticeDefinitionOrNull(
 fun EditablePracticeBlock.summaryLabel(): String {
     val cadence = steps.mapNotNull { step ->
         parseDurationMillis(step.durationInput)?.let { durationMillis ->
-            "${step.action.label} ${formatSeconds(durationMillis)}s"
+            val displayLabel = step.label.ifBlank { "Step" }
+            "$displayLabel ${formatSeconds(durationMillis)}s"
         }
     }.joinToString(" / ")
     if (cadence.isBlank()) return "Enter valid step durations."
@@ -179,11 +179,11 @@ fun CustomPracticeBuilderDraft.summaryLabel(): String {
 private fun EditablePracticeBlock.toAuthoredBlockOrNull(): AuthoredPracticeBlock.RepeatingCycle? {
     val authoredSteps = steps.mapNotNull { step ->
         val durationMillis = parseDurationMillis(step.durationInput) ?: return null
+        val safeLabel = step.label.trim().ifBlank { "Step" }
         AuthoredPracticeStep(
-            action = step.action,
             durationMillis = durationMillis,
-            label = step.action.label,
-            route = BreathRoute.Both,
+            label = safeLabel,
+            colorHex = normalizeColorHexOrDefault(step.colorHex, safeLabel),
         )
     }
     if (authoredSteps.isEmpty()) return null
@@ -209,7 +209,7 @@ private fun EditablePracticeBlock.toAuthoredBlockOrNull(): AuthoredPracticeBlock
 private fun draftSubtitle(blocks: List<AuthoredPracticeBlock.RepeatingCycle>): String {
     if (blocks.size == 1) {
         return blocks.first().cycle.steps.joinToString(" / ") { step ->
-            "${step.action.label} ${formatSeconds(step.safeDurationMillis)}s"
+            "${step.label} ${formatSeconds(step.safeDurationMillis)}s"
         }
     }
     return "${blocks.size} block routine"
@@ -218,7 +218,7 @@ private fun draftSubtitle(blocks: List<AuthoredPracticeBlock.RepeatingCycle>): S
 private fun draftDescription(blocks: List<AuthoredPracticeBlock.RepeatingCycle>): String {
     return blocks.joinToString(separator = " Then ") { block ->
         val cadence = block.cycle.steps.joinToString(", ") { step ->
-            "${step.action.label.lowercase()} ${formatSeconds(step.safeDurationMillis)} seconds"
+            "${step.label.lowercase()} ${formatSeconds(step.safeDurationMillis)} seconds"
         }
         val targetSummary = when (val target = block.target) {
             is AuthoredBlockTarget.DurationMillis -> "for ${target.durationMillis / 60_000L} minutes"
@@ -316,6 +316,44 @@ fun List<EditablePracticeStep>.moveStep(
         val item = removeAt(currentIndex)
         add(targetIndex, item)
     }
+}
+
+private const val MinimumEditableDurationSeconds = 0.1
+private const val MaximumEditableDurationSeconds = 3_600.0
+private const val MaximumDurationInputLength = 12
+
+fun sanitizeDurationInput(input: String): String {
+    if (input.isBlank()) return ""
+    val filtered = buildString(input.length.coerceAtMost(MaximumDurationInputLength)) {
+        var hasDecimalPoint = false
+        input.forEach { character ->
+            when {
+                character.isDigit() -> append(character)
+                character == '.' && !hasDecimalPoint -> {
+                    hasDecimalPoint = true
+                    append(character)
+                }
+            }
+            if (length >= MaximumDurationInputLength) return@forEach
+        }
+    }
+    return filtered
+}
+
+fun adjustDurationInputBySeconds(
+    currentInput: String,
+    deltaSeconds: Int,
+): String {
+    if (deltaSeconds == 0) return sanitizeDurationInput(currentInput)
+
+    val currentSeconds = currentInput.trim().toDoubleOrNull()
+        ?.takeIf { it.isFinite() && it > 0.0 }
+        ?: 1.0
+    val adjustedSeconds = (currentSeconds + deltaSeconds)
+        .coerceIn(MinimumEditableDurationSeconds, MaximumEditableDurationSeconds)
+    val adjustedMillis = (adjustedSeconds * 1_000.0).roundToLong()
+        .coerceAtLeast(AuthoredPracticeStep.MinimumDurationMillis)
+    return sanitizeDurationInput(formatSeconds(adjustedMillis))
 }
 
 private fun parseDurationMillis(input: String): Long? {

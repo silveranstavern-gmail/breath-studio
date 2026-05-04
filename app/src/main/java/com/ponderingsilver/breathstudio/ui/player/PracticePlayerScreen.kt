@@ -3,18 +3,16 @@ package com.ponderingsilver.breathstudio.ui.player
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,7 +21,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,8 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ponderingsilver.breathstudio.SessionConfig
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
-import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 import com.ponderingsilver.breathstudio.domain.model.PlayerSessionState
 import com.ponderingsilver.breathstudio.domain.model.SessionStatus
 import com.ponderingsilver.breathstudio.ui.components.SelectionPill
@@ -70,7 +65,7 @@ fun PracticePlayerScreen(
 
     val state = sessionState ?: return
     val accent = accentColorForPractice(config.practice.safeCategory)
-    val phaseTint = accentForAction(state.currentAction)
+    val phaseTint = colorFromHex(state.currentStep.colorHex)
 
     Scaffold(
         contentWindowInsets = WindowInsets.systemBars,
@@ -109,13 +104,11 @@ fun PracticePlayerScreen(
             ) {
                 PlayerTopBar(
                     title = config.practice.safeTitle,
-                    visualMode = config.visualMode,
                     onBack = onBack,
                 )
                 PlayerHero(
                     sessionState = state,
-                    visualMode = config.visualMode,
-                    accent = accent,
+                    stepColor = phaseTint,
                     totalMinutes = config.durationMinutes.coerceAtLeast(1),
                     modifier = Modifier.weight(1f),
                 )
@@ -139,7 +132,6 @@ fun PracticePlayerScreen(
 @Composable
 private fun PlayerTopBar(
     title: String,
-    visualMode: BreathingVisualMode,
     onBack: () -> Unit,
 ) {
     Row(
@@ -150,15 +142,14 @@ private fun PlayerTopBar(
         TextButton(onClick = onBack) {
             Text("Back", style = MaterialTheme.typography.titleMedium)
         }
-        SelectionPill(text = "$title • ${visualMode.label}")
+        SelectionPill(text = title)
     }
 }
 
 @Composable
 private fun PlayerHero(
     sessionState: PlayerSessionState,
-    visualMode: BreathingVisualMode,
-    accent: Color,
+    stepColor: Color,
     totalMinutes: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -183,26 +174,23 @@ private fun PlayerHero(
                     color = Color(0xD5F4EFE2),
                 )
                 Text(
-                    text = "${sessionState.plan.practice.safeSubtitle} • ${totalMinutes.coerceAtLeast(1)} min • ${visualMode.label} guide",
+                    text = "${sessionState.plan.practice.safeSubtitle} • ${totalMinutes.coerceAtLeast(1)} min",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xBEE0E9E7),
                 )
             }
-            BoxWithConstraints(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
-                val maxVisualSize = minOf(maxWidth, 360.dp)
                 BreathingVisual(
-                    visualMode = visualMode,
-                    action = sessionState.currentAction,
-                    stepProgress = sessionState.currentStepProgress,
-                    cycleProgress = sessionState.currentCycleProgress,
-                    sessionProgress = sessionState.sessionProgress,
-                    accent = accent,
-                    modifier = Modifier.size(maxVisualSize),
+                    stageProgress = sessionState.currentStageProgress,
+                    stepColor = stepColor,
+                    modifier = Modifier
+                        .sizeIn(maxWidth = 360.dp, maxHeight = 360.dp)
+                        .aspectRatio(1f),
                 )
                 Column(
                     modifier = Modifier.fillMaxWidth(0.52f),
@@ -360,19 +348,17 @@ private fun accentColorForPractice(category: String): Color = when (category) {
     else -> Color(0xFF9CCBE9)
 }
 
-private fun accentForAction(action: BreathAction): Color = when (action) {
-    BreathAction.Inhale -> Color(0xFF7ED9C8)
-    BreathAction.HoldIn -> Color(0xFFE7C98C)
-    BreathAction.Exhale -> Color(0xFF9BC1FF)
-    BreathAction.HoldOut -> Color(0xFFC7D7D4)
-    BreathAction.Rest -> Color(0xFFE8E1D1)
-}
-
 private fun formatClock(millis: Long): String {
     val totalSeconds = (millis / 1_000L).coerceAtLeast(0L)
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     return "%d:%02d".format(minutes, seconds)
+}
+
+private fun colorFromHex(hex: String): Color {
+    return runCatching {
+        Color(android.graphics.Color.parseColor(hex))
+    }.getOrDefault(Color(0xFF9CCBE9))
 }
 
 private fun formatSeconds(millis: Long): String {

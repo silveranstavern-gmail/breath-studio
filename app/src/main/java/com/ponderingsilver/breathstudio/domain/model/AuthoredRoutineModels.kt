@@ -6,13 +6,13 @@ sealed interface AuthoredBlockTarget {
 }
 
 data class AuthoredPracticeStep(
-    val action: BreathAction,
     val durationMillis: Long,
-    val label: String = action.label,
-    val route: BreathRoute = BreathRoute.Both,
+    val label: String = "Step",
+    val colorHex: String = defaultColorHexForLabel(label),
 ) {
     val safeDurationMillis: Long = durationMillis.coerceAtLeast(MinimumDurationMillis)
-    val safeLabel: String = label.trim().ifBlank { action.label }
+    val safeLabel: String = label.trim().ifBlank { "Step" }
+    val safeColorHex: String = normalizeColorHexOrDefault(colorHex, safeLabel)
 
     companion object {
         const val MinimumDurationMillis: Long = 100L
@@ -37,17 +37,6 @@ sealed interface AuthoredPracticeBlock {
         val cycle: AuthoredPracticeCycle,
         val target: AuthoredBlockTarget,
     ) : AuthoredPracticeBlock {
-        val safeTitle: String = title.trim().ifBlank { "Practice block" }
-    }
-
-    data class Sequence(
-        override val title: String,
-        val steps: List<AuthoredPracticeStep>,
-    ) : AuthoredPracticeBlock {
-        init {
-            require(steps.isNotEmpty()) { "An authored sequence block must contain at least one step." }
-        }
-
         val safeTitle: String = title.trim().ifBlank { "Practice block" }
     }
 }
@@ -88,8 +77,8 @@ fun AuthoredPracticeDefinition.toDomainPracticeOrNull(): BreathPractice? = runCa
                     cycle = PracticeCycle(
                         steps = listOf(
                             PracticeStep(
-                                action = BreathAction.Rest,
                                 durationSeconds = 1,
+                                label = "Rest",
                             ),
                         ),
                     ),
@@ -113,10 +102,9 @@ fun BreathPractice.toAuthoredPracticeDefinition(): AuthoredPracticeDefinition = 
             cycle = AuthoredPracticeCycle(
                 steps = stage.cycle.steps.map { step ->
                     AuthoredPracticeStep(
-                        action = step.action,
                         durationMillis = step.durationMillis,
                         label = step.safeLabel,
-                        route = step.route,
+                        colorHex = step.safeColorHex,
                     )
                 },
             ),
@@ -151,26 +139,15 @@ private fun AuthoredPracticeBlock.toPracticeStageOrNull(): PracticeStage? {
                 )
             }.getOrNull()
         }
-        is AuthoredPracticeBlock.Sequence -> {
-            val domainSteps = steps.map { it.toPracticeStep() }
-            runCatching {
-                PracticeStage(
-                    title = safeTitle,
-                    cycle = PracticeCycle(domainSteps),
-                    target = PracticeStageTarget.Rounds(1),
-                )
-            }.getOrNull()
-        }
     }
 }
 
 private fun AuthoredPracticeStep.toPracticeStep(): PracticeStep = PracticeStep(
-    action = action,
     durationSeconds = ceilDiv(safeDurationMillis, 1_000L)
         .coerceAtMost(Int.MAX_VALUE.toLong())
         .toInt(),
     label = safeLabel,
-    route = route,
+    colorHex = safeColorHex,
 )
 
 private fun ceilDiv(value: Long, divisor: Long): Long = (value + divisor - 1L) / divisor

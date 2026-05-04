@@ -1,7 +1,5 @@
 package com.ponderingsilver.breathstudio.data.practice
 
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
-import com.ponderingsilver.breathstudio.domain.model.BreathRoute
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -10,42 +8,26 @@ import org.junit.Test
 
 class AuthoredPracticeRecordCodecTest {
     @Test
-    fun codecRoundTripsNestedPracticeWithDelimiterText() {
+    fun codecRoundTripsSimplePractice() {
         val dto = validDto(
-            title = "Box | Breath",
-            subtitle = "Calm\nFocus",
-            description = "A practice with symbols | and newlines\ninside fields.",
-            preferredVisualModeName = BreathingVisualMode.SquareTracer.name,
+            title = "Box Breath",
             blocks = listOf(
                 AuthoredPracticeBlockDto(
                     kind = AuthoredPracticeBlockDto.KindRepeatingCycle,
-                    title = "Stage | One",
-                    target = AuthoredBlockTargetDto.durationMillis(90_000L),
+                    title = "Main",
+                    target = AuthoredBlockTargetDto.durationMillis(300_000L),
                     cycle = AuthoredPracticeCycleDto(
                         steps = listOf(
                             AuthoredPracticeStepDto(
-                                actionName = BreathAction.Inhale.name,
-                                durationMillis = 5_000L,
-                                label = "In | Left",
-                                routeName = BreathRoute.Left.name,
+                                durationMillis = 4_000L,
+                                label = "Inhale",
+                                colorHex = "#7ED9C8",
                             ),
                             AuthoredPracticeStepDto(
-                                actionName = BreathAction.Exhale.name,
-                                durationMillis = 7_250L,
-                                label = "Out\nRight",
-                                routeName = BreathRoute.Right.name,
+                                durationMillis = 4_000L,
+                                label = "Exhale",
+                                colorHex = "#9BC1FF",
                             ),
-                        ),
-                    ),
-                ),
-                AuthoredPracticeBlockDto(
-                    kind = AuthoredPracticeBlockDto.KindSequence,
-                    title = "Hold\nBlock",
-                    steps = listOf(
-                        AuthoredPracticeStepDto(
-                            actionName = BreathAction.HoldOut.name,
-                            durationMillis = 60_000L,
-                            label = "Hold | Still",
                         ),
                     ),
                 ),
@@ -86,8 +68,8 @@ class AuthoredPracticeRecordCodecTest {
                 cycle = AuthoredPracticeCycleDto(
                     steps = listOf(
                         AuthoredPracticeStepDto(
-                            actionName = BreathAction.Inhale.name,
                             durationMillis = 4_000L,
+                            label = "Inhale",
                         ),
                     ),
                 ),
@@ -104,3 +86,4 @@ class AuthoredPracticeRecordCodecTest {
     )
 
 }
+

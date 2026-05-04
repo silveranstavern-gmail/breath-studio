@@ -5,19 +5,19 @@ object BuiltInPractices {
         id = "box",
         title = "Box Breathing",
         subtitle = "Steady focus",
-        description = "A four-sided breath for balance and concentration, best paired with the square guide.",
+        description = "A four-sided breath for balance and concentration, guided by a soft visual glow.",
         category = "Focus",
-        preferredVisualMode = BreathingVisualMode.SquareTracer,
+        preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
                 title = "Main cycle",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(BreathAction.Inhale, 4),
-                        PracticeStep(BreathAction.HoldIn, 4),
-                        PracticeStep(BreathAction.Exhale, 4),
-                        PracticeStep(BreathAction.HoldOut, 4),
+                        PracticeStep(durationSeconds = 4, label = "Inhale"),
+                        PracticeStep(durationSeconds = 4, label = "Hold In"),
+                        PracticeStep(durationSeconds = 4, label = "Exhale"),
+                        PracticeStep(durationSeconds = 4, label = "Hold Out"),
                     ),
                 ),
             ),
@@ -30,16 +30,16 @@ object BuiltInPractices {
         subtitle = "Long release",
         description = "A classic calming ratio with a longer hold and a fuller exhale.",
         category = "Calm",
-        preferredVisualMode = BreathingVisualMode.Circle,
+        preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
                 title = "Main cycle",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(BreathAction.Inhale, 4),
-                        PracticeStep(BreathAction.HoldIn, 7),
-                        PracticeStep(BreathAction.Exhale, 8),
+                        PracticeStep(durationSeconds = 4, label = "Inhale"),
+                        PracticeStep(durationSeconds = 7, label = "Hold In"),
+                        PracticeStep(durationSeconds = 8, label = "Exhale"),
                     ),
                 ),
             ),
@@ -52,16 +52,16 @@ object BuiltInPractices {
         subtitle = "Gentle reset",
         description = "A softer downshift with a longer exhale and a lighter internal pause.",
         category = "Reset",
-        preferredVisualMode = BreathingVisualMode.Circle,
+        preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
                 title = "Main cycle",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(BreathAction.Inhale, 4),
-                        PracticeStep(BreathAction.HoldIn, 2),
-                        PracticeStep(BreathAction.Exhale, 6),
+                        PracticeStep(durationSeconds = 4, label = "Inhale"),
+                        PracticeStep(durationSeconds = 2, label = "Hold In"),
+                        PracticeStep(durationSeconds = 6, label = "Exhale"),
                     ),
                 ),
             ),
@@ -74,15 +74,15 @@ object BuiltInPractices {
         subtitle = "Stage-based downshift",
         description = "A progressive practice that lengthens the exhale over three stages without changing the inhale.",
         category = "Sleep",
-        preferredVisualMode = BreathingVisualMode.Circle,
+        preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
                 title = "Settle",
                 target = PracticeStageTarget.Rounds(3),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(BreathAction.Inhale, 4),
-                        PracticeStep(BreathAction.Exhale, 6),
+                        PracticeStep(durationSeconds = 4, label = "Inhale"),
+                        PracticeStep(durationSeconds = 6, label = "Exhale"),
                     ),
                 ),
             ),
@@ -91,8 +91,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(3),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(BreathAction.Inhale, 4),
-                        PracticeStep(BreathAction.Exhale, 8),
+                        PracticeStep(durationSeconds = 4, label = "Inhale"),
+                        PracticeStep(durationSeconds = 8, label = "Exhale"),
                     ),
                 ),
             ),
@@ -101,8 +101,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(3),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(BreathAction.Inhale, 4),
-                        PracticeStep(BreathAction.Exhale, 10),
+                        PracticeStep(durationSeconds = 4, label = "Inhale"),
+                        PracticeStep(durationSeconds = 10, label = "Exhale"),
                     ),
                 ),
             ),

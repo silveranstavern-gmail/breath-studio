@@ -1,7 +1,5 @@
 package com.ponderingsilver.breathstudio.data.practice
 
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
-import com.ponderingsilver.breathstudio.domain.model.BreathRoute
 import com.ponderingsilver.breathstudio.domain.model.PracticeStageTarget
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
@@ -27,8 +25,8 @@ class AuthoredPracticeDtosTest {
                     cycle = AuthoredPracticeCycleDto(
                         steps = listOf(
                             AuthoredPracticeStepDto(
-                                actionName = "NotARealAction",
                                 durationMillis = 4_000L,
+                                label = "  ",
                             ),
                         ),
                     ),
@@ -54,10 +52,8 @@ class AuthoredPracticeDtosTest {
                     cycle = AuthoredPracticeCycleDto(
                         steps = listOf(
                             AuthoredPracticeStepDto(
-                                actionName = BreathAction.Inhale.name,
                                 durationMillis = -5L,
-                                label = "",
-                                routeName = "BogusRoute",
+                                label = "Step",
                             ),
                         ),
                     ),
@@ -72,8 +68,8 @@ class AuthoredPracticeDtosTest {
         assertEquals(PracticeStageTarget.Rounds(1), practice.stages.first().target)
         assertEquals("Practice block", practice.stages.first().safeTitle)
         assertEquals(1, practice.stages.first().cycle.steps.first().safeDurationSeconds)
-        assertEquals(BreathAction.Inhale.label, practice.stages.first().cycle.steps.first().safeLabel)
-        assertEquals(BreathRoute.Both, practice.stages.first().cycle.steps.first().route)
+        assertEquals("Step", practice.stages.first().cycle.steps.first().safeLabel)
+        assertEquals("#7ED9C8", practice.stages.first().cycle.steps.first().safeColorHex)
     }
 
     @Test
@@ -86,8 +82,8 @@ class AuthoredPracticeDtosTest {
                     cycle = AuthoredPracticeCycleDto(
                         steps = listOf(
                             AuthoredPracticeStepDto(
-                                actionName = BreathAction.Exhale.name,
                                 durationMillis = 10_000L,
+                                label = "Exhale",
                             ),
                         ),
                     ),
@@ -102,37 +98,6 @@ class AuthoredPracticeDtosTest {
         )
     }
 
-    @Test
-    fun mapperPreservesSequenceBlockAndSubSecondDurationsInAuthoredDefinition() {
-        val definition = validDto(
-            blocks = listOf(
-                AuthoredPracticeBlockDto(
-                    kind = AuthoredPracticeBlockDto.KindSequence,
-                    title = "Retention",
-                    steps = listOf(
-                        AuthoredPracticeStepDto(
-                            actionName = BreathAction.Exhale.name,
-                            durationMillis = 400L,
-                            label = "Exhale fully",
-                            routeName = BreathRoute.Left.name,
-                        ),
-                        AuthoredPracticeStepDto(
-                            actionName = BreathAction.HoldOut.name,
-                            durationMillis = 60_000L,
-                            routeName = BreathRoute.Right.name,
-                        ),
-                    ),
-                ),
-            ),
-        ).toAuthoredDefinitionOrNull()
-
-        assertNotNull(definition)
-        val block = requireNotNull(definition).blocks.single() as com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeBlock.Sequence
-        assertEquals(listOf(400L, 60_000L), block.steps.map { it.safeDurationMillis })
-        assertEquals(listOf(BreathRoute.Left, BreathRoute.Right), block.steps.map { it.route })
-        assertTrue(block.steps.first().safeLabel.contains("Exhale"))
-    }
-
     private fun validDto(
         id: String = "custom",
         title: String = "Custom Practice",
@@ -145,8 +110,8 @@ class AuthoredPracticeDtosTest {
                 cycle = AuthoredPracticeCycleDto(
                     steps = listOf(
                         AuthoredPracticeStepDto(
-                            actionName = BreathAction.Inhale.name,
                             durationMillis = 4_000L,
+                            label = "Inhale",
                         ),
                     ),
                 ),
@@ -160,3 +125,4 @@ class AuthoredPracticeDtosTest {
         defaultDurationMinutes = defaultDurationMinutes,
     )
 }
+

@@ -1,6 +1,5 @@
 package com.ponderingsilver.breathstudio.domain.session
 
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
 import com.ponderingsilver.breathstudio.domain.model.BreathPractice
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 import com.ponderingsilver.breathstudio.domain.model.PracticeCycle
@@ -42,8 +41,8 @@ class SessionEngineTest {
     fun invalidStepDurationIsClampedBeforeExecution() {
         val practice = testPractice(
             steps = listOf(
-                PracticeStep(BreathAction.Inhale, durationSeconds = 0, label = ""),
-                PracticeStep(BreathAction.Exhale, durationSeconds = -9),
+                PracticeStep(durationSeconds = 0, label = "Inhale"),
+                PracticeStep(durationSeconds = -9, label = "Exhale"),
             ),
         )
 
@@ -86,10 +85,41 @@ class SessionEngineTest {
         assertEquals(plan.steps.lastIndex, finalState.currentStepIndex)
     }
 
+    @Test
+    fun stageProgressResetsWhenAdvancingToNextStage() {
+        val practice = BreathPractice(
+            id = "stages",
+            title = "Stages",
+            subtitle = "Stage progress",
+            description = "Tracks stage progress.",
+            category = "Test",
+            preferredVisualMode = BreathingVisualMode.Glow,
+            stages = listOf(
+                PracticeStage(
+                    title = "First",
+                    target = PracticeStageTarget.Rounds(1),
+                    cycle = PracticeCycle(listOf(PracticeStep(durationSeconds = 2, label = "Inhale"))),
+                ),
+                PracticeStage(
+                    title = "Second",
+                    target = PracticeStageTarget.Rounds(1),
+                    cycle = PracticeCycle(listOf(PracticeStep(durationSeconds = 2, label = "Exhale"))),
+                ),
+            ),
+        )
+        val plan = buildExecutableSessionPlan(practice, SessionRunTarget.PracticeCycles(1))
+
+        val first = advanceSession(newPlayerSession(plan), 1_000L)
+        val second = advanceSession(first, 1_500L)
+
+        assertEquals(0.5f, first.currentStageProgress, 0.001f)
+        assertTrue(second.currentStageProgress < 0.5f)
+    }
+
     private fun testPractice(
         steps: List<PracticeStep> = listOf(
-            PracticeStep(BreathAction.Inhale, durationSeconds = 2),
-            PracticeStep(BreathAction.Exhale, durationSeconds = 4),
+            PracticeStep(durationSeconds = 2, label = "Inhale"),
+            PracticeStep(durationSeconds = 4, label = "Exhale"),
         ),
     ): BreathPractice = BreathPractice(
         id = "test",
@@ -97,7 +127,7 @@ class SessionEngineTest {
         subtitle = "Testing",
         description = "A small deterministic practice for session-engine tests.",
         category = "Test",
-        preferredVisualMode = BreathingVisualMode.Circle,
+        preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
                 title = "Main",
@@ -107,3 +137,4 @@ class SessionEngineTest {
         ),
     )
 }
+

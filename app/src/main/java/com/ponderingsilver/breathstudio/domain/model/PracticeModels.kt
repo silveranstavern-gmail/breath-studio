@@ -1,22 +1,7 @@
 package com.ponderingsilver.breathstudio.domain.model
 
-enum class BreathAction(val label: String) {
-    Inhale("Inhale"),
-    HoldIn("Hold In"),
-    Exhale("Exhale"),
-    HoldOut("Hold Out"),
-    Rest("Rest"),
-}
-
-enum class BreathRoute(val label: String) {
-    Both("Both"),
-    Left("Left"),
-    Right("Right"),
-}
-
 enum class BreathingVisualMode(val label: String) {
-    Circle("Circle"),
-    SquareTracer("Square"),
+    Glow("Glow"),
 }
 
 sealed interface SessionRunTarget {
@@ -30,13 +15,13 @@ sealed interface PracticeStageTarget {
 }
 
 data class PracticeStep(
-    val action: BreathAction,
     val durationSeconds: Int,
-    val label: String = action.label,
-    val route: BreathRoute = BreathRoute.Both,
+    val label: String = "Step",
+    val colorHex: String = defaultColorHexForLabel(label),
 ) {
     val safeDurationSeconds: Int = durationSeconds.coerceAtLeast(MinimumStepDurationSeconds)
-    val safeLabel: String = label.trim().ifBlank { action.label }
+    val safeLabel: String = label.trim().ifBlank { "Step" }
+    val safeColorHex: String = normalizeColorHexOrDefault(colorHex, safeLabel)
     val durationMillis: Long = safeDurationSeconds * 1_000L
 
     companion object {
@@ -105,10 +90,9 @@ data class BreathPractice(
 }
 
 data class ExecutableBreathStep(
-    val action: BreathAction,
     val label: String,
     val durationMillis: Long,
-    val route: BreathRoute,
+    val colorHex: String,
     val stageIndex: Int,
     val stageTitle: String,
     val roundInStage: Int,
@@ -142,9 +126,6 @@ data class PlayerSessionState(
 ) {
     val currentStep: ExecutableBreathStep
         get() = plan.steps[currentStepIndex]
-
-    val currentAction: BreathAction
-        get() = currentStep.action
 
     val currentLabel: String
         get() = currentStep.label
@@ -180,8 +161,53 @@ data class PlayerSessionState(
             return ((completedMillis + inStepMillis) / cycleDuration).coerceIn(0f, 1f)
         }
 
+    val currentStageProgress: Float
+        get() {
+            val stageSteps = plan.steps.filter { it.stageIndex == currentStep.stageIndex }
+            val stageDuration = stageSteps.sumOf { it.durationMillis }.toFloat()
+            if (stageDuration <= 0f) return 1f
+
+            val stageStartIndex = stageSteps.firstOrNull()?.let { first ->
+                plan.steps.indexOfFirst { candidate ->
+                    candidate.stageIndex == first.stageIndex &&
+                        candidate.roundInStage == first.roundInStage &&
+                        candidate.stepIndexInCycle == first.stepIndexInCycle
+                }
+            } ?: return 0f
+            val completedMillisBeforeStage = plan.steps.take(stageStartIndex).sumOf { it.durationMillis }.toFloat()
+            val elapsedInStage = (elapsedSessionMillis.toFloat() - completedMillisBeforeStage).coerceIn(0f, stageDuration)
+            return (elapsedInStage / stageDuration).coerceIn(0f, 1f)
+        }
+
     private fun currentStageCycleSteps(): List<ExecutableBreathStep> {
         val stageId = currentStep.stageIndex to currentStep.roundInStage
         return plan.steps.filter { it.stageIndex == stageId.first && it.roundInStage == stageId.second }
     }
+}
+
+private val LabelColorPresets: Map<String, String> = mapOf(
+    "inhale" to "#7ED9C8",
+    "hold in" to "#E7C98C",
+    "hold" to "#E7C98C",
+    "exhale" to "#9BC1FF",
+    "hold out" to "#C7D7D4",
+    "rest" to "#E8E1D1",
+)
+
+fun defaultColorHexForLabel(label: String): String {
+    val key = label.trim().lowercase()
+    return LabelColorPresets[key] ?: "#7ED9C8"
+}
+
+fun normalizeColorHexOrNull(value: String?): String? {
+    val trimmed = value?.trim().orEmpty()
+    if (trimmed.isEmpty()) return null
+    val withoutHash = if (trimmed.startsWith("#")) trimmed.drop(1) else trimmed
+    if (withoutHash.length != 6) return null
+    if (!withoutHash.all { char -> char.isDigit() || char.lowercaseChar() in 'a'..'f' }) return null
+    return "#${withoutHash.uppercase()}"
+}
+
+fun normalizeColorHexOrDefault(value: String?, label: String): String {
+    return normalizeColorHexOrNull(value) ?: defaultColorHexForLabel(label)
 }

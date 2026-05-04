@@ -43,12 +43,14 @@ import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 @Composable
 fun PracticeHomeScreen(
     practices: List<BreathPractice>,
-    selectedPractice: BreathPractice,
+    selectedPractice: BreathPractice?,
     onPracticeSelected: (BreathPractice) -> Unit,
     onStartSession: () -> Unit,
+    onAddPreset: () -> Unit,
     onCreateCustomPractice: () -> Unit,
     onEditSelectedPractice: () -> Unit,
-    canEditSelectedPractice: Boolean,
+    onDeleteSelectedPractice: () -> Unit,
+    canManageSelectedPractice: Boolean,
 ) {
     val scrollState = rememberScrollState()
     val backgroundBrush = remember {
@@ -96,22 +98,29 @@ fun PracticeHomeScreen(
             HomeHero(selectedPractice = selectedPractice)
             Spacer(modifier = Modifier.height(24.dp))
             SectionTitle(
-                title = "Start a practice",
-                subtitle = "Select a saved or built-in practice. The practice controls its own duration and guide.",
+                title = "Your library",
+                subtitle = "Saved sessions all run through the same flow. Add a preset, build your own, then edit or delete from here.",
             )
             Spacer(modifier = Modifier.height(14.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                practices.forEach { practice ->
-                    PracticeCard(
-                        practice = practice,
-                        selected = practice.safeId == selectedPractice.safeId,
-                        onClick = { onPracticeSelected(practice) },
-                    )
+            if (practices.isEmpty()) {
+                EmptyLibraryCard(
+                    title = "Your library is empty.",
+                    subtitle = "Add a preset or create a custom session to start building it.",
+                )
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    practices.forEach { practice ->
+                        PracticeCard(
+                            practice = practice,
+                            selected = practice.safeId == selectedPractice?.safeId,
+                            onClick = { onPracticeSelected(practice) },
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
             Button(
-                onClick = onCreateCustomPractice,
+                onClick = onAddPreset,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -120,11 +129,26 @@ fun PracticeHomeScreen(
                 ),
             ) {
                 Text(
-                    text = "Create custom practice",
+                    text = "Add preset",
                     style = MaterialTheme.typography.titleSmall,
                 )
             }
-            if (canEditSelectedPractice) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(
+                onClick = onCreateCustomPractice,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0x10FFFFFF),
+                    contentColor = Color(0xFFF1E0BA),
+                ),
+            ) {
+                Text(
+                    text = "Create custom session",
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            }
+            if (canManageSelectedPractice) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = onEditSelectedPractice,
@@ -136,36 +160,61 @@ fun PracticeHomeScreen(
                     ),
                 ) {
                     Text(
-                        text = "Edit selected custom practice",
+                        text = "Edit selected session",
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    onClick = onDeleteSelectedPractice,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(26.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0x14A84444),
+                        contentColor = Color(0xFFFFE1D7),
+                    ),
+                ) {
+                    Text(
+                        text = "Delete selected session",
                         style = MaterialTheme.typography.titleSmall,
                     )
                 }
             }
             Spacer(modifier = Modifier.height(26.dp))
-            Button(
-                onClick = onStartSession,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(30.dp),
-                contentPadding = PaddingValues(vertical = 18.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFECD7AB),
-                    contentColor = Color(0xFF153139),
-                ),
-            ) {
+            if (selectedPractice != null) {
+                Button(
+                    onClick = onStartSession,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(30.dp),
+                    contentPadding = PaddingValues(vertical = 18.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFECD7AB),
+                        contentColor = Color(0xFF153139),
+                    ),
+                ) {
+                    Text(
+                        text = "Begin ${selectedPractice.safeTitle}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Begin ${selectedPractice.safeTitle}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    text = "${selectedPractice.safeDefaultDurationMinutes} min • ${selectedPractice.safeCategory} • ${selectedPractice.cadenceLabel}",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    color = Color(0xCCE7EFEA),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            } else {
+                Text(
+                    text = "Add or create a session to start practicing.",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    color = Color(0xCCE7EFEA),
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "${selectedPractice.safeDefaultDurationMinutes} min • ${selectedPractice.safeCategory} • ${selectedPractice.preferredVisualMode.label} • ${selectedPractice.cadenceLabel}",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                color = Color(0xCCE7EFEA),
-                style = MaterialTheme.typography.bodyMedium,
-            )
             Spacer(modifier = Modifier.height(28.dp))
         }
     }
@@ -173,7 +222,7 @@ fun PracticeHomeScreen(
 
 @Composable
 private fun HomeHero(
-    selectedPractice: BreathPractice,
+    selectedPractice: BreathPractice?,
 ) {
     Box(
         modifier = Modifier
@@ -220,7 +269,7 @@ private fun HomeHero(
                 shape = RoundedCornerShape(24.dp),
             ) {
                 Text(
-                    text = "Featured now: ${selectedPractice.safeTitle}",
+                    text = selectedPractice?.let { "Selected now: ${it.safeTitle}" } ?: "Build a library you can actually reuse",
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                     style = MaterialTheme.typography.titleSmall,
                 )
@@ -230,7 +279,7 @@ private fun HomeHero(
 }
 
 @Composable
-private fun SectionTitle(
+internal fun SectionTitle(
     title: String,
     subtitle: String,
 ) {
@@ -249,10 +298,11 @@ private fun SectionTitle(
 }
 
 @Composable
-private fun PracticeCard(
+internal fun PracticeCard(
     practice: BreathPractice,
     selected: Boolean,
     onClick: () -> Unit,
+    trailingLabel: String = if (selected) "Selected" else practice.safeCategory,
 ) {
     val accent = when (practice.safeCategory) {
         "Focus" -> Color(0xFF88D4D0)
@@ -300,7 +350,7 @@ private fun PracticeCard(
                         color = accent,
                     )
                 }
-                SelectionPill(text = if (selected) "Selected" else practice.safeCategory)
+                SelectionPill(text = trailingLabel)
             }
             Text(
                 text = practice.safeDescription,
@@ -310,8 +360,37 @@ private fun PracticeCard(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SelectionPill(text = "${practice.stages.size} stage${if (practice.stages.size == 1) "" else "s"}")
-                SelectionPill(text = practice.preferredVisualMode.label)
+                SelectionPill(text = practice.safeCategory)
             }
+        }
+    }
+}
+
+@Composable
+internal fun EmptyLibraryCard(
+    title: String,
+    subtitle: String,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = Color(0x10FFFFFF),
+        shape = RoundedCornerShape(28.dp),
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFF8F4EA),
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xDCE7EFEC),
+            )
         }
     }
 }

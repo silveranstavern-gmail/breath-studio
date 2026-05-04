@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ponderingsilver.breathstudio.data.practice.PracticeRepository
 import com.ponderingsilver.breathstudio.ui.builder.CustomPracticeBuilderScreen
+import com.ponderingsilver.breathstudio.ui.home.PresetPickerScreen
 import com.ponderingsilver.breathstudio.ui.home.PracticeHomeScreen
 import com.ponderingsilver.breathstudio.ui.player.PracticePlayerScreen
 import com.ponderingsilver.breathstudio.ui.theme.BreathStudioTheme
@@ -34,12 +35,21 @@ fun BreathStudioApp(
                 BreathStudioRoute.Home -> {
                     PracticeHomeScreen(
                         practices = appState.practices,
-                        selectedPractice = appState.selectedEntry.practice,
+                        selectedPractice = appState.selectedEntry?.practice,
                         onPracticeSelected = appViewModel::selectPractice,
                         onStartSession = appViewModel::startSelectedPractice,
+                        onAddPreset = appViewModel::openPresetPicker,
                         onCreateCustomPractice = appViewModel::createCustomPractice,
                         onEditSelectedPractice = appViewModel::editSelectedPractice,
-                        canEditSelectedPractice = appState.selectedEntry.canEdit,
+                        onDeleteSelectedPractice = appViewModel::deleteSelectedPractice,
+                        canManageSelectedPractice = appState.selectedEntry?.canEdit == true,
+                    )
+                }
+                BreathStudioRoute.PresetPicker -> {
+                    PresetPickerScreen(
+                        presets = appState.availablePresets,
+                        onAddPreset = appViewModel::addPresetToLibrary,
+                        onBack = appViewModel::goHome,
                     )
                 }
                 is BreathStudioRoute.Builder -> {

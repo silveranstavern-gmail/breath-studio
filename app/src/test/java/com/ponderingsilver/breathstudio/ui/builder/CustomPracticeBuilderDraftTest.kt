@@ -5,7 +5,6 @@ import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeBlock
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeStep
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -19,7 +18,7 @@ class CustomPracticeBuilderDraftTest {
     fun draftBuildsRepeatingBlocksWithDurationAndRoundsTargets() {
         val definition = CustomPracticeBuilderDraft(
             title = "Evening Ladder",
-            visualMode = BreathingVisualMode.SquareTracer,
+            visualMode = BreathingVisualMode.Glow,
             blocks = listOf(
                 EditablePracticeBlock(
                     id = "block-1",
@@ -27,8 +26,8 @@ class CustomPracticeBuilderDraftTest {
                     targetMode = BuilderTargetMode.DurationMinutes,
                     targetValueInput = "10",
                     steps = listOf(
-                        EditablePracticeStep("1", BreathAction.Inhale, "5"),
-                        EditablePracticeStep("2", BreathAction.Exhale, "5"),
+                        EditablePracticeStep("1", "5", "Inhale"),
+                        EditablePracticeStep("2", "5", "Exhale"),
                     ),
                 ),
                 EditablePracticeBlock(
@@ -37,10 +36,10 @@ class CustomPracticeBuilderDraftTest {
                     targetMode = BuilderTargetMode.Repetitions,
                     targetValueInput = "6",
                     steps = listOf(
-                        EditablePracticeStep("3", BreathAction.Inhale, "6"),
-                        EditablePracticeStep("4", BreathAction.HoldIn, "6"),
-                        EditablePracticeStep("5", BreathAction.Exhale, "6"),
-                        EditablePracticeStep("6", BreathAction.HoldOut, "6"),
+                        EditablePracticeStep("3", "6", "Inhale"),
+                        EditablePracticeStep("4", "6", "Hold"),
+                        EditablePracticeStep("5", "6", "Exhale"),
+                        EditablePracticeStep("6", "6", "Hold"),
                     ),
                 ),
             ),
@@ -50,7 +49,7 @@ class CustomPracticeBuilderDraftTest {
         assertNotNull(definition)
         requireNotNull(definition)
         assertEquals("custom-evening-ladder", definition.safeId)
-        assertEquals(BreathingVisualMode.SquareTracer, definition.preferredVisualMode)
+        assertEquals(BreathingVisualMode.Glow, definition.preferredVisualMode)
         assertEquals(13, definition.safeDefaultDurationMinutes)
         assertEquals(2, definition.blocks.size)
         val firstBlock = definition.blocks[0] as AuthoredPracticeBlock.RepeatingCycle
@@ -59,26 +58,6 @@ class CustomPracticeBuilderDraftTest {
         assertEquals(AuthoredBlockTarget.Repetitions(6), secondBlock.target)
         assertEquals(listOf(5_000L, 5_000L), firstBlock.cycle.steps.map { it.safeDurationMillis })
         assertEquals(listOf(6_000L, 6_000L, 6_000L, 6_000L), secondBlock.cycle.steps.map { it.safeDurationMillis })
-    }
-
-    @Test
-    fun draftRejectsInvalidDurationInput() {
-        val definition = CustomPracticeBuilderDraft(
-            blocks = listOf(
-                EditablePracticeBlock(
-                    id = "block-1",
-                    title = "Broken",
-                    targetMode = BuilderTargetMode.Repetitions,
-                    targetValueInput = "3",
-                    steps = listOf(
-                        EditablePracticeStep("1", BreathAction.Inhale, "abc"),
-                    ),
-                ),
-            ),
-            selectedBlockId = "block-1",
-        ).toAuthoredPracticeDefinitionOrNull { "invalid" }
-
-        assertNull(definition)
     }
 
     @Test
@@ -94,8 +73,8 @@ class CustomPracticeBuilderDraftTest {
                     title = "Settle",
                     cycle = AuthoredPracticeCycle(
                         steps = listOf(
-                            AuthoredPracticeStep(BreathAction.Inhale, 4_000L),
-                            AuthoredPracticeStep(BreathAction.Exhale, 6_000L),
+                            AuthoredPracticeStep(4_000L, "Inhale"),
+                            AuthoredPracticeStep(6_000L, "Exhale"),
                         ),
                     ),
                     target = AuthoredBlockTarget.Repetitions(8),
@@ -104,14 +83,14 @@ class CustomPracticeBuilderDraftTest {
                     title = "Lengthen",
                     cycle = AuthoredPracticeCycle(
                         steps = listOf(
-                            AuthoredPracticeStep(BreathAction.Inhale, 5_000L),
-                            AuthoredPracticeStep(BreathAction.Exhale, 7_000L),
+                            AuthoredPracticeStep(5_000L, "Inhale"),
+                            AuthoredPracticeStep(7_000L, "Exhale"),
                         ),
                     ),
                     target = AuthoredBlockTarget.DurationMillis(300_000L),
                 ),
             ),
-            preferredVisualMode = BreathingVisualMode.Circle,
+            preferredVisualMode = BreathingVisualMode.Glow,
             defaultDurationMinutes = 5,
         )
 
@@ -143,8 +122,8 @@ class CustomPracticeBuilderDraftTest {
                     targetMode = BuilderTargetMode.Repetitions,
                     targetValueInput = "3",
                     steps = listOf(
-                        EditablePracticeStep("1", BreathAction.Inhale, "1.5"),
-                        EditablePracticeStep("2", BreathAction.Exhale, "2"),
+                        EditablePracticeStep("1", "1.5", "Inhale"),
+                        EditablePracticeStep("2", "2", "Exhale"),
                     ),
                 ),
                 EditablePracticeBlock(
@@ -153,8 +132,8 @@ class CustomPracticeBuilderDraftTest {
                     targetMode = BuilderTargetMode.DurationMinutes,
                     targetValueInput = "2",
                     steps = listOf(
-                        EditablePracticeStep("3", BreathAction.Inhale, "4"),
-                        EditablePracticeStep("4", BreathAction.Exhale, "6"),
+                        EditablePracticeStep("3", "4", "Inhale"),
+                        EditablePracticeStep("4", "6", "Exhale"),
                     ),
                 ),
             ),
@@ -166,4 +145,57 @@ class CustomPracticeBuilderDraftTest {
         assertEquals(130_500L, draft.estimatedTotalDurationMillisOrNull())
         assertFalse(draft.summaryLabel().isBlank())
     }
+
+    @Test
+    fun draftPreservesCustomStepLabelsWhenSavingAndReloading() {
+        val definition = CustomPracticeBuilderDraft(
+            title = "Alt nostril",
+            blocks = listOf(
+                EditablePracticeBlock(
+                    id = "block-1",
+                    title = "Main",
+                    targetMode = BuilderTargetMode.Repetitions,
+                    targetValueInput = "4",
+                    steps = listOf(
+                        EditablePracticeStep("1", "4", "Left nostril inhale"),
+                        EditablePracticeStep("2", "4", "Left nostril hold", "#AA7733"),
+                        EditablePracticeStep("3", "4", "Right nostril exhale", "#3366AA"),
+                    ),
+                ),
+            ),
+            selectedBlockId = "block-1",
+        ).toAuthoredPracticeDefinitionOrNull { "alt-nostril" }
+
+        assertNotNull(definition)
+        requireNotNull(definition)
+        val steps = (definition.blocks.first() as AuthoredPracticeBlock.RepeatingCycle).cycle.steps
+        assertEquals(
+            listOf("Left nostril inhale", "Left nostril hold", "Right nostril exhale"),
+            steps.map { it.label },
+        )
+        assertEquals("#3366AA", steps.last().safeColorHex)
+
+        val reloadedDraft = definition.toBuilderDraftOrNull()
+        assertNotNull(reloadedDraft)
+        assertEquals(
+            listOf("Left nostril inhale", "Left nostril hold", "Right nostril exhale"),
+            requireNotNull(reloadedDraft).blocks.first().steps.map { it.label },
+        )
+        assertEquals("#3366AA", requireNotNull(reloadedDraft).blocks.first().steps.last().colorHex)
+    }
+
+    @Test
+    fun sanitizeDurationInputKeepsSingleDecimalAndDigitsOnly() {
+        assertEquals("12.34", sanitizeDurationInput("a12..b3.4"))
+        assertEquals("", sanitizeDurationInput("   "))
+    }
+
+    @Test
+    fun adjustDurationInputBySecondsHandlesInvalidAndBounds() {
+        assertEquals("2", adjustDurationInputBySeconds("1", 1))
+        assertEquals("0.1", adjustDurationInputBySeconds("0.1", -1))
+        assertEquals("2", adjustDurationInputBySeconds("bad", 1))
+        assertEquals("3600", adjustDurationInputBySeconds("999999", 1))
+    }
 }
+

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ponderingsilver.breathstudio.data.practice.PracticeLibraryEntry
-import com.ponderingsilver.breathstudio.data.practice.PracticeSource
 import com.ponderingsilver.breathstudio.data.practice.toAuthoredDto
 import com.ponderingsilver.breathstudio.data.preferences.UserPreferences
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
@@ -19,27 +18,12 @@ import kotlinx.coroutines.launch
 
 data class BreathStudioAppState(
     val route: BreathStudioRoute = BreathStudioRoute.Home,
-    val entries: List<PracticeLibraryEntry> = DefaultEntries,
-    val selectedEntry: PracticeLibraryEntry = DefaultEntries.first(),
+    val entries: List<PracticeLibraryEntry> = emptyList(),
+    val selectedEntry: PracticeLibraryEntry? = null,
+    val availablePresets: List<BreathPractice> = BuiltInPractices.all,
 ) {
     val practices: List<BreathPractice>
         get() = entries.map { entry -> entry.practice }
-
-    companion object {
-        val DefaultEntries: List<PracticeLibraryEntry> = BuiltInPractices.all.map { practice ->
-            PracticeLibraryEntry(
-                practice = practice,
-                source = PracticeSource.BuiltIn,
-            )
-        }.ifEmpty {
-            listOf(
-                PracticeLibraryEntry(
-                    practice = BuiltInPractices.BoxBreathing,
-                    source = PracticeSource.BuiltIn,
-                ),
-            )
-        }
-    }
 }
 
 class BreathStudioAppViewModel(
@@ -52,12 +36,14 @@ class BreathStudioAppViewModel(
         appContainer.userPreferencesRepository.preferences,
         appContainer.practiceRepository.entries,
     ) { currentRoute, userPreferences, libraryEntries ->
-        val safeEntries = libraryEntries.ifEmpty { BreathStudioAppState.DefaultEntries }
-        val selectedEntry = safeEntries.selectedEntryFor(userPreferences)
+        val selectedEntry = libraryEntries.selectedEntryFor(userPreferences)
         BreathStudioAppState(
             route = currentRoute,
-            entries = safeEntries,
+            entries = libraryEntries,
             selectedEntry = selectedEntry,
+            availablePresets = BuiltInPractices.all.filterNot { preset ->
+                libraryEntries.any { entry -> entry.practice.safeId == preset.safeId }
+            },
         )
     }.stateIn(
         scope = viewModelScope,
@@ -72,9 +58,14 @@ class BreathStudioAppViewModel(
     }
 
     fun startSelectedPractice() {
+        val selectedPractice = appState.value.selectedEntry?.practice ?: return
         route.value = BreathStudioRoute.Player(
-            config = SessionConfig.fromPractice(appState.value.selectedEntry.practice),
+            config = SessionConfig.fromPractice(selectedPractice),
         )
+    }
+
+    fun openPresetPicker() {
+        route.value = BreathStudioRoute.PresetPicker
     }
 
     fun createCustomPractice() {
@@ -82,9 +73,35 @@ class BreathStudioAppViewModel(
     }
 
     fun editSelectedPractice() {
+        val authoredDefinition = appState.value.selectedEntry?.authoredDefinition ?: return
         route.value = BreathStudioRoute.Builder(
-            initialDefinition = appState.value.selectedEntry.authoredDefinition,
+            initialDefinition = authoredDefinition,
         )
+    }
+
+    fun addPresetToLibrary(practice: BreathPractice) {
+        viewModelScope.launch {
+            val saved = appContainer.savedPracticeStore.upsertPractice(practice.toAuthoredDto())
+            if (saved) {
+                appContainer.userPreferencesRepository.setSelectedPracticeId(practice.safeId)
+                route.value = BreathStudioRoute.Home
+            }
+        }
+    }
+
+    fun deleteSelectedPractice() {
+        val selectedEntry = appState.value.selectedEntry ?: return
+        val selectedId = selectedEntry.practice.safeId
+        viewModelScope.launch {
+            val deleted = appContainer.savedPracticeStore.deletePractice(selectedId)
+            if (deleted) {
+                val remainingEntries = appState.value.entries.filterNot { entry ->
+                    entry.practice.safeId == selectedId
+                }
+                val nextSelection = remainingEntries.firstOrNull()?.practice?.safeId.orEmpty()
+                appContainer.userPreferencesRepository.setSelectedPracticeId(nextSelection)
+            }
+        }
     }
 
     fun goHome() {
@@ -101,10 +118,9 @@ class BreathStudioAppViewModel(
 
     private fun List<PracticeLibraryEntry>.selectedEntryFor(
         userPreferences: UserPreferences,
-    ): PracticeLibraryEntry {
+    ): PracticeLibraryEntry? {
         return firstOrNull { entry -> entry.practice.safeId == userPreferences.selectedPracticeId }
-            ?: firstOrNull { entry -> entry.practice.safeId == BuiltInPractices.BoxBreathing.safeId }
-            ?: first()
+            ?: firstOrNull()
     }
 }
 

@@ -5,14 +5,13 @@ import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeBlock
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeStep
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
 import com.ponderingsilver.breathstudio.domain.model.BreathPractice
-import com.ponderingsilver.breathstudio.domain.model.BreathRoute
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 import com.ponderingsilver.breathstudio.domain.model.PracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.PracticeStage
 import com.ponderingsilver.breathstudio.domain.model.PracticeStageTarget
 import com.ponderingsilver.breathstudio.domain.model.PracticeStep
+import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrDefault
 import com.ponderingsilver.breathstudio.domain.model.toAuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.toDomainPracticeOrNull
 import kotlinx.serialization.Serializable
@@ -52,20 +51,17 @@ data class AuthoredPracticeBlockDto(
     val title: String = "",
     val target: AuthoredBlockTargetDto? = null,
     val cycle: AuthoredPracticeCycleDto? = null,
-    val steps: List<AuthoredPracticeStepDto> = emptyList(),
 ) {
     companion object {
         const val KindRepeatingCycle = "repeating_cycle"
-        const val KindSequence = "sequence"
     }
 }
 
 @Serializable
 data class AuthoredPracticeStepDto(
-    val actionName: String,
     val durationMillis: Long,
-    val label: String = "",
-    val routeName: String? = null,
+    val label: String,
+    val colorHex: String? = null,
 )
 
 @Serializable
@@ -153,10 +149,9 @@ fun BreathPractice.toAuthoredDto(): AuthoredPracticeDto = AuthoredPracticeDto(
             cycle = AuthoredPracticeCycleDto(
                 steps = stage.cycle.steps.map { step ->
                     AuthoredPracticeStepDto(
-                        actionName = step.action.name,
                         durationMillis = step.durationMillis,
                         label = step.safeLabel,
-                        routeName = step.route.name,
+                        colorHex = step.safeColorHex,
                     )
                 },
             ),
@@ -184,11 +179,6 @@ fun AuthoredPracticeDefinition.toAuthoredDto(): AuthoredPracticeDto = AuthoredPr
                 cycle = AuthoredPracticeCycleDto(
                     steps = block.cycle.steps.map { step -> step.toDto() },
                 ),
-            )
-            is AuthoredPracticeBlock.Sequence -> AuthoredPracticeBlockDto(
-                kind = AuthoredPracticeBlockDto.KindSequence,
-                title = block.safeTitle,
-                steps = block.steps.map { step -> step.toDto() },
             )
         }
     },
@@ -221,52 +211,39 @@ private fun AuthoredPracticeStageDto.toLegacyBlockOrNull(): AuthoredPracticeBloc
 }
 
 private fun AuthoredPracticeBlockDto.toDomainOrNull(): AuthoredPracticeBlock? {
-    return when (kind.trim()) {
-        AuthoredPracticeBlockDto.KindSequence -> {
-            val domainSteps = steps.take(MaximumStepsPerCycle).mapNotNull { it.toAuthoredStepOrNull() }
-            if (domainSteps.isEmpty()) null else AuthoredPracticeBlock.Sequence(
-                title = title.safeText("Practice block", MaximumTitleLength),
-                steps = domainSteps,
-            )
-        }
-        else -> {
-            val domainSteps = cycle?.steps.orEmpty().take(MaximumStepsPerCycle).mapNotNull { it.toAuthoredStepOrNull() }
-            if (domainSteps.isEmpty()) null else AuthoredPracticeBlock.RepeatingCycle(
-                title = title.safeText("Practice block", MaximumTitleLength),
-                cycle = AuthoredPracticeCycle(domainSteps),
-                target = target?.toDomainTarget() ?: AuthoredBlockTarget.Repetitions(1),
-            )
-        }
-    }
+    val domainSteps = cycle?.steps.orEmpty().take(MaximumStepsPerCycle).mapNotNull { it.toAuthoredStepOrNull() }
+    if (domainSteps.isEmpty()) return null
+    return AuthoredPracticeBlock.RepeatingCycle(
+        title = title.safeText("Practice block", MaximumTitleLength),
+        cycle = AuthoredPracticeCycle(domainSteps),
+        target = target?.toDomainTarget() ?: AuthoredBlockTarget.Repetitions(1),
+    )
 }
 
 private fun AuthoredPracticeStepDto.toDomainOrNull(): PracticeStep? {
-    val action = BreathAction.entries.firstOrNull { it.name == actionName.trim() } ?: return null
+    val safeLabel = label.safeRequiredText(MaximumStepLabelLength) ?: return null
     return PracticeStep(
-        action = action,
         durationSeconds = ceilDiv(durationMillis.coerceIn(MinimumStepDurationMillis, MaximumStepDurationMillis), 1_000L)
             .coerceAtMost(MaximumStepDurationSeconds.toLong())
             .toInt(),
-        label = label.safeText(action.label, MaximumStepLabelLength),
-        route = parseRoute(routeName),
+        label = safeLabel,
+        colorHex = normalizeColorHexOrDefault(colorHex, safeLabel),
     )
 }
 
 private fun AuthoredPracticeStepDto.toAuthoredStepOrNull(): AuthoredPracticeStep? {
-    val action = BreathAction.entries.firstOrNull { it.name == actionName.trim() } ?: return null
+    val safeLabel = label.safeRequiredText(MaximumStepLabelLength) ?: return null
     return AuthoredPracticeStep(
-        action = action,
         durationMillis = durationMillis.coerceIn(MinimumStepDurationMillis, MaximumStepDurationMillis),
-        label = label.safeText(action.label, MaximumStepLabelLength),
-        route = parseRoute(routeName),
+        label = safeLabel,
+        colorHex = normalizeColorHexOrDefault(colorHex, safeLabel),
     )
 }
 
 private fun AuthoredPracticeStep.toDto(): AuthoredPracticeStepDto = AuthoredPracticeStepDto(
-    actionName = action.name,
     durationMillis = safeDurationMillis,
     label = safeLabel,
-    routeName = route.name,
+    colorHex = safeColorHex,
 )
 
 private fun AuthoredBlockTargetDto.toDomainTarget(): AuthoredBlockTarget {
@@ -304,12 +281,7 @@ private fun AuthoredStageTargetDto.toDomainTarget(): PracticeStageTarget {
 
 private fun parseVisualMode(value: String?): BreathingVisualMode {
     return BreathingVisualMode.entries.firstOrNull { it.name == value?.trim() }
-        ?: BreathingVisualMode.Circle
-}
-
-private fun parseRoute(value: String?): BreathRoute {
-    return BreathRoute.entries.firstOrNull { it.name == value?.trim() }
-        ?: BreathRoute.Both
+        ?: BreathingVisualMode.Glow
 }
 
 private fun String.safeText(

@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,10 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
+import com.ponderingsilver.breathstudio.domain.model.defaultColorHexForLabel
+import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrNull
 import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 
 @Composable
@@ -85,9 +90,13 @@ fun BuilderHeader(
 fun BuilderSection(
     title: String,
     subtitle: String,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -111,6 +120,7 @@ fun BlockSummaryCard(
     canMoveDown: Boolean,
     canRemove: Boolean,
     onSelect: () -> Unit,
+    onEdit: () -> Unit,
     onDuplicate: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
@@ -174,6 +184,9 @@ fun BlockSummaryCard(
                         Text("Down")
                     }
                 }
+                TextButton(onClick = onEdit, contentPadding = PaddingValues(0.dp)) {
+                    Text("Edit")
+                }
                 TextButton(onClick = onDuplicate, contentPadding = PaddingValues(0.dp)) {
                     Text("Copy")
                 }
@@ -194,13 +207,17 @@ fun StepEditorCard(
     canRemove: Boolean,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
-    onActionSelected: (BreathAction) -> Unit,
+    onPresetSelected: (StepPreset) -> Unit,
+    onLabelChanged: (String) -> Unit,
+    onColorHexChanged: (String) -> Unit,
     onDurationChanged: (String) -> Unit,
     onRemove: () -> Unit,
     onDuplicate: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
 ) {
+    val normalizedColorHex = normalizeColorHexOrNull(step.colorHex) ?: defaultColorHexForLabel(step.label)
+    val previewColor = colorFromHex(normalizedColorHex)
     Card(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
@@ -246,34 +263,170 @@ fun StepEditorCard(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                BreathAction.entries.forEach { action ->
+                DefaultStepPresets.forEach { preset ->
                     BuilderChoiceChip(
-                        title = action.label,
-                        caption = if (action == step.action) "Selected" else "Tap to use",
-                        selected = action == step.action,
-                        onClick = { onActionSelected(action) },
+                        title = preset.label,
+                        caption = if (step.label.trim().equals(preset.label, ignoreCase = true)) "Selected" else "Tap to use",
+                        selected = step.label.trim().equals(preset.label, ignoreCase = true),
+                        onClick = { onPresetSelected(preset) },
                     )
                 }
             }
             OutlinedTextField(
-                value = step.durationInput,
-                onValueChange = { value ->
-                    onDurationChanged(value.filter { it.isDigit() || it == '.' })
-                },
+                value = step.label,
+                onValueChange = onLabelChanged,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions.Default,
-                label = { Text("Seconds") },
+                placeholder = { Text("Step") },
+                label = { Text("Display label") },
                 supportingText = {
-                    Text(
-                        text = "Sub-second values like 0.5 are supported.",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Text("What the user sees during the session.")
+                }
+            )
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                DefaultStepPresets.forEach { preset ->
+                    val presetHex = preset.colorHex
+                    val selected = normalizedColorHex == presetHex
+                    BuilderChoiceChip(
+                        title = preset.label,
+                        caption = if (selected) "Preset active" else presetHex,
+                        selected = selected,
+                        onClick = { onColorHexChanged(presetHex) },
                     )
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                OutlinedTextField(
+                    value = step.colorHex,
+                    onValueChange = { onColorHexChanged(it) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    label = { Text("Step Color HEX") },
+                    placeholder = { Text("#7ED9C8") },
+                    supportingText = { Text("Use #RRGGBB (e.g. #9BC1FF).") },
+                )
+                Surface(
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .clip(RoundedCornerShape(14.dp)),
+                    shape = RoundedCornerShape(14.dp),
+                    color = previewColor.copy(alpha = 0.24f),
+                    contentColor = Color(0xFFF4EEE3),
+                ) {
+                    Text(
+                        text = normalizedColorHex,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
+            DurationStepper(
+                value = step.durationInput,
+                onValueChanged = onDurationChanged,
+                onStepDown = {
+                    onDurationChanged(adjustDurationInputBySeconds(step.durationInput, -1))
+                },
+                onStepUp = {
+                    onDurationChanged(adjustDurationInputBySeconds(step.durationInput, 1))
                 },
             )
         }
     }
+}
+
+@Composable
+private fun DurationStepper(
+    value: String,
+    onValueChanged: (String) -> Unit,
+    onStepDown: () -> Unit,
+    onStepUp: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = "Seconds",
+            style = MaterialTheme.typography.labelMedium,
+            color = Color(0xDDEBE6DA),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            DurationStepButton(
+                text = "-",
+                onClick = onStepDown,
+            )
+            OutlinedTextField(
+                value = value,
+                onValueChange = { nextValue ->
+                    onValueChanged(sanitizeDurationInput(nextValue))
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(DurationStepperHeight),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default,
+                textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center),
+                placeholder = {
+                    Text(
+                        text = "4",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                    )
+                },
+            )
+            DurationStepButton(
+                text = "+",
+                onClick = onStepUp,
+            )
+        }
+        Text(
+            text = "Use decimals (e.g. 0.5s).",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xBCE0EAE7),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun DurationStepButton(
+    text: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .width(52.dp)
+            .height(DurationStepperHeight)
+            .clip(RoundedCornerShape(14.dp))
+            .border(1.dp, Color(0x66E9DDC2), RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp,
+            color = Color(0xFFF8F0DE),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+private val DurationStepperHeight = 56.dp
+
+private fun colorFromHex(hex: String): Color {
+    return runCatching { Color(android.graphics.Color.parseColor(hex)) }
+        .getOrDefault(Color(0xFF9CCBE9))
 }
 
 @Composable

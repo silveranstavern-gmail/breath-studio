@@ -68,30 +68,15 @@ internal fun buildTemplateSteps(definition: AuthoredPracticeDefinition): List<Ex
                 repeat(rounds) { roundIndex ->
                     cycleSteps.forEachIndexed { stepIndex, step ->
                         steps += ExecutableBreathStep(
-                            action = step.action,
                             label = step.safeLabel,
                             durationMillis = step.safeDurationMillis,
-                            route = step.route,
+                            colorHex = step.safeColorHex,
                             stageIndex = blockIndex,
                             stageTitle = block.safeTitle,
                             roundInStage = roundIndex,
                             stepIndexInCycle = stepIndex,
                         )
                     }
-                }
-            }
-            is AuthoredPracticeBlock.Sequence -> {
-                block.steps.forEachIndexed { stepIndex, step ->
-                    steps += ExecutableBreathStep(
-                        action = step.action,
-                        label = step.safeLabel,
-                        durationMillis = step.safeDurationMillis,
-                        route = step.route,
-                        stageIndex = blockIndex,
-                        stageTitle = block.safeTitle,
-                        roundInStage = 0,
-                        stepIndexInCycle = stepIndex,
-                    )
                 }
             }
         }

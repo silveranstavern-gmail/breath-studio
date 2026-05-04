@@ -1,10 +1,8 @@
 package com.ponderingsilver.breathstudio.ui.builder
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,13 +18,14 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,23 +34,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
-import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
-import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 import java.util.UUID
+import kotlinx.coroutines.launch
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun CustomPracticeBuilderScreen(
     initialDefinition: AuthoredPracticeDefinition? = null,
     onCancel: () -> Unit,
@@ -63,6 +58,8 @@ fun CustomPracticeBuilderScreen(
     var saveError by remember { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val stepsSectionRequester = remember { BringIntoViewRequester() }
+    val coroutineScope = rememberCoroutineScope()
     val selectedBlock = draft.selectedBlock
     val totalDurationMillis = draft.estimatedTotalDurationMillisOrNull()
     val isEditing = draft.hasExistingPractice
@@ -117,6 +114,12 @@ fun CustomPracticeBuilderScreen(
                             canRemove = draft.blocks.size > 1,
                             onSelect = {
                                 draft = draft.copy(selectedBlockId = block.id)
+                            },
+                            onEdit = {
+                                draft = draft.copy(selectedBlockId = block.id)
+                                coroutineScope.launch {
+                                    stepsSectionRequester.bringIntoView()
+                                }
                             },
                             onDuplicate = {
                                 val duplicate = newEditableBlockFromTemplate(block)
@@ -259,6 +262,7 @@ fun CustomPracticeBuilderScreen(
             BuilderSection(
                 title = "Cycle steps",
                 subtitle = "Tweak the selected block, then duplicate it if the next section is just a variation.",
+                modifier = Modifier.bringIntoViewRequester(stepsSectionRequester),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     selectedBlock.steps.forEachIndexed { index, step ->
@@ -268,12 +272,27 @@ fun CustomPracticeBuilderScreen(
                             canRemove = selectedBlock.steps.size > 1,
                             canMoveUp = index > 0,
                             canMoveDown = index < selectedBlock.steps.lastIndex,
-                            onActionSelected = { action ->
+                            onPresetSelected = { preset ->
                                 draft = draft.updateSelectedBlock { block ->
                                     block.copy(
                                         steps = block.steps.replaceStep(
                                             stepId = step.id,
-                                            transform = { it.copy(action = action) },
+                                            transform = {
+                                                it.copy(
+                                                    label = preset.label,
+                                                    colorHex = preset.colorHex,
+                                                )
+                                            },
+                                        ),
+                                    )
+                                }
+                            },
+                            onLabelChanged = { label ->
+                                draft = draft.updateSelectedBlock { block ->
+                                    block.copy(
+                                        steps = block.steps.replaceStep(
+                                            stepId = step.id,
+                                            transform = { it.copy(label = label) },
                                         ),
                                     )
                                 }
@@ -284,6 +303,20 @@ fun CustomPracticeBuilderScreen(
                                         steps = block.steps.replaceStep(
                                             stepId = step.id,
                                             transform = { it.copy(durationInput = duration) },
+                                        ),
+                                    )
+                                }
+                            },
+                            onColorHexChanged = { colorHex ->
+                                draft = draft.updateSelectedBlock { block ->
+                                    block.copy(
+                                        steps = block.steps.replaceStep(
+                                            stepId = step.id,
+                                            transform = { editableStep ->
+                                                editableStep.copy(
+                                                    colorHex = colorHex,
+                                                )
+                                            },
                                         ),
                                     )
                                 }
@@ -313,11 +346,13 @@ fun CustomPracticeBuilderScreen(
                     TextButton(
                         onClick = {
                             draft = draft.updateSelectedBlock { block ->
+                                val nextPreset = nextSuggestedPreset(block.steps.lastOrNull()?.label)
                                 block.copy(
                                     steps = block.steps + EditablePracticeStep(
                                         id = UUID.randomUUID().toString(),
-                                        action = nextSuggestedAction(block.steps.lastOrNull()?.action),
+                                        label = nextPreset.label,
                                         durationInput = "4",
+                                        colorHex = nextPreset.colorHex,
                                     ),
                                 )
                             }
@@ -325,24 +360,6 @@ fun CustomPracticeBuilderScreen(
                         contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                     ) {
                         Text("Add step")
-                    }
-                }
-            }
-            BuilderSection(
-                title = "Visual guide",
-                subtitle = "Save the routine with its default visual preference.",
-            ) {
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    BreathingVisualMode.entries.forEach { mode ->
-                        BuilderChoiceChip(
-                            title = mode.label,
-                            caption = if (mode == BreathingVisualMode.Circle) "Expanding guide" else "Square tracer",
-                            selected = draft.visualMode == mode,
-                            onClick = { draft = draft.copy(visualMode = mode) },
-                        )
                     }
                 }
             }

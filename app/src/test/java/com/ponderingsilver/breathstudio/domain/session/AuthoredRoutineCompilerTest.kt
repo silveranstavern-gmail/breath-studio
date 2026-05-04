@@ -5,8 +5,6 @@ import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeBlock
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeCycle
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeStep
-import com.ponderingsilver.breathstudio.domain.model.BreathAction
-import com.ponderingsilver.breathstudio.domain.model.BreathRoute
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -21,8 +19,8 @@ class AuthoredRoutineCompilerTest {
                         title = "Box",
                         cycle = AuthoredPracticeCycle(
                             steps = listOf(
-                                AuthoredPracticeStep(BreathAction.Inhale, durationMillis = 1_000L),
-                                AuthoredPracticeStep(BreathAction.Exhale, durationMillis = 2_000L),
+                                AuthoredPracticeStep(durationMillis = 1_000L, label = "Inhale"),
+                                AuthoredPracticeStep(durationMillis = 2_000L, label = "Exhale"),
                             ),
                         ),
                         target = AuthoredBlockTarget.Repetitions(2),
@@ -45,8 +43,8 @@ class AuthoredRoutineCompilerTest {
                         title = "Ladder",
                         cycle = AuthoredPracticeCycle(
                             steps = listOf(
-                                AuthoredPracticeStep(BreathAction.Inhale, durationMillis = 500L),
-                                AuthoredPracticeStep(BreathAction.Exhale, durationMillis = 500L),
+                                AuthoredPracticeStep(durationMillis = 500L, label = "Inhale"),
+                                AuthoredPracticeStep(durationMillis = 500L, label = "Exhale"),
                             ),
                         ),
                         target = AuthoredBlockTarget.DurationMillis(durationMillis = 2_500L),
@@ -60,38 +58,6 @@ class AuthoredRoutineCompilerTest {
         assertEquals(listOf(0, 0, 1, 1, 2, 2), steps.map { it.roundInStage })
     }
 
-    @Test
-    fun sequenceBlockRunsOnceAndPreservesRoutesAndSubSecondDurations() {
-        val steps = buildTemplateSteps(
-            definition = testDefinition(
-                blocks = listOf(
-                    AuthoredPracticeBlock.Sequence(
-                        title = "Retention",
-                        steps = listOf(
-                            AuthoredPracticeStep(
-                                action = BreathAction.Exhale,
-                                durationMillis = 400L,
-                                label = "Exhale fully",
-                                route = BreathRoute.Left,
-                            ),
-                            AuthoredPracticeStep(
-                                action = BreathAction.HoldOut,
-                                durationMillis = 60_000L,
-                                route = BreathRoute.Right,
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
-
-        assertEquals(2, steps.size)
-        assertEquals(listOf(400L, 60_000L), steps.map { it.durationMillis })
-        assertEquals(listOf("Exhale fully", BreathAction.HoldOut.label), steps.map { it.label })
-        assertEquals(listOf(BreathRoute.Left, BreathRoute.Right), steps.map { it.route })
-        assertEquals(listOf(0, 0), steps.map { it.roundInStage })
-    }
-
     private fun testDefinition(
         blocks: List<AuthoredPracticeBlock>,
     ): AuthoredPracticeDefinition = AuthoredPracticeDefinition(
@@ -101,6 +67,7 @@ class AuthoredRoutineCompilerTest {
         description = "A routine used for authored compiler coverage.",
         category = "Test",
         blocks = blocks,
-        preferredVisualMode = BreathingVisualMode.Circle,
+        preferredVisualMode = BreathingVisualMode.Glow,
     )
 }
+
