@@ -45,19 +45,35 @@ class PracticePlayerViewModel : ViewModel() {
         }
 
         activeConfigKey = configKey
-        val plan = buildExecutableSessionPlan(
-            practice = config.practice,
-            durationMinutes = config.durationMinutes,
-            visualMode = config.visualMode,
-        )
-        _sessionState.value = newPlayerSession(plan)
-        emitCue(PlayerCueEvent.StepStarted(stepIndex = 0, step = plan.steps.first()))
+        val plan = if (config.authoredDefinition != null) {
+            buildExecutableSessionPlan(
+                practice = config.practice,
+                authoredDefinition = config.authoredDefinition,
+                durationMinutes = config.durationMinutes,
+                visualMode = config.visualMode,
+            )
+        } else {
+            buildExecutableSessionPlan(
+                practice = config.practice,
+                durationMinutes = config.durationMinutes,
+                visualMode = config.visualMode,
+            )
+        }
+        _sessionState.value = newPlayerSession(plan).withOrientationDelay()
         startTicker()
     }
 
     fun pauseOrResume() {
         val current = _sessionState.value ?: return
         val nextState = when (current.status) {
+            SessionStatus.Preparing -> {
+                val started = current.copy(
+                    status = SessionStatus.Running,
+                    orientationRemainingMillis = 0L,
+                )
+                emitCue(PlayerCueEvent.StepStarted(stepIndex = started.currentStepIndex, step = started.currentStep))
+                started
+            }
             SessionStatus.Running -> {
                 emitCue(PlayerCueEvent.StepStopped)
                 current.copy(status = SessionStatus.Paused)
@@ -73,12 +89,11 @@ class PracticePlayerViewModel : ViewModel() {
                 resumed
             }
             SessionStatus.Complete -> {
-                emitCue(PlayerCueEvent.StepStarted(stepIndex = 0, step = current.plan.steps.first()))
-                newPlayerSession(current.plan)
+                newPlayerSession(current.plan).withOrientationDelay()
             }
         }
         _sessionState.value = nextState
-        if (_sessionState.value?.status == SessionStatus.Running) {
+        if (_sessionState.value?.status.isClockActive()) {
             startTicker()
         } else {
             stopTicker()
@@ -87,8 +102,7 @@ class PracticePlayerViewModel : ViewModel() {
 
     fun restart() {
         val current = _sessionState.value ?: return
-        _sessionState.value = newPlayerSession(current.plan)
-        emitCue(PlayerCueEvent.StepStarted(stepIndex = 0, step = current.plan.steps.first()))
+        _sessionState.value = newPlayerSession(current.plan).withOrientationDelay()
         startTicker()
     }
 
@@ -101,7 +115,7 @@ class PracticePlayerViewModel : ViewModel() {
         stopTicker()
         tickerJob = viewModelScope.launch {
             var lastTickMillis = SystemClock.elapsedRealtime()
-            while (_sessionState.value?.status == SessionStatus.Running) {
+            while (_sessionState.value?.status.isClockActive()) {
                 delay(TickIntervalMillis)
                 val nowMillis = SystemClock.elapsedRealtime()
                 val deltaMillis = (nowMillis - lastTickMillis)
@@ -109,6 +123,21 @@ class PracticePlayerViewModel : ViewModel() {
                 lastTickMillis = nowMillis
 
                 val current = _sessionState.value ?: break
+                if (current.status == SessionStatus.Preparing) {
+                    val remainingOrientationMillis = (current.orientationRemainingMillis - deltaMillis).coerceAtLeast(0L)
+                    if (remainingOrientationMillis == 0L) {
+                        val started = current.copy(
+                            status = SessionStatus.Running,
+                            orientationRemainingMillis = 0L,
+                        )
+                        _sessionState.value = started
+                        emitCue(PlayerCueEvent.StepStarted(stepIndex = started.currentStepIndex, step = started.currentStep))
+                    } else {
+                        _sessionState.value = current.copy(orientationRemainingMillis = remainingOrientationMillis)
+                    }
+                    continue
+                }
+
                 val advanced = advanceSession(current, deltaMillis)
                 if (advanced.currentStepIndex != current.currentStepIndex && advanced.status != SessionStatus.Complete) {
                     emitCue(
@@ -135,11 +164,21 @@ class PracticePlayerViewModel : ViewModel() {
         _cueEvents.tryEmit(event)
     }
 
+    private fun PlayerSessionState.withOrientationDelay(): PlayerSessionState = copy(
+        status = SessionStatus.Preparing,
+        orientationRemainingMillis = OrientationDelayMillis,
+    )
+
+    private fun SessionStatus?.isClockActive(): Boolean {
+        return this == SessionStatus.Preparing || this == SessionStatus.Running
+    }
+
     private data class SessionConfigKey(
         val practiceId: String,
         val practiceHash: Int,
         val durationMinutes: Int,
         val visualModeName: String,
+        val authoredDefinitionHash: Int?,
     ) {
         companion object {
             fun from(config: SessionConfig): SessionConfigKey = SessionConfigKey(
@@ -147,6 +186,7 @@ class PracticePlayerViewModel : ViewModel() {
                 practiceHash = config.practice.hashCode(),
                 durationMinutes = config.durationMinutes.coerceAtLeast(1),
                 visualModeName = config.visualMode.name,
+                authoredDefinitionHash = config.authoredDefinition?.hashCode(),
             )
         }
     }
@@ -154,6 +194,7 @@ class PracticePlayerViewModel : ViewModel() {
     private companion object {
         const val TickIntervalMillis = 50L
         const val MaximumTickDeltaMillis = 1_000L
+        const val OrientationDelayMillis = 3_000L
         const val CueEventBufferCapacity = 8
     }
 }

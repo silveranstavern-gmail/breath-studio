@@ -26,10 +26,9 @@ data class StepPreset(
 )
 
 val DefaultStepPresets: List<StepPreset> = listOf(
-    StepPreset(label = "Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
-    StepPreset(label = "Hold In", colorHex = "#E7C98C", sound = StepSound.Hold),
-    StepPreset(label = "Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
-    StepPreset(label = "Hold Out", colorHex = "#C7D7D4", sound = StepSound.Hold),
+    StepPreset(label = "In", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+    StepPreset(label = "Out", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+    StepPreset(label = "Hold", colorHex = "#E7C98C", sound = StepSound.Hold),
 )
 
 data class EditablePracticeStep(
@@ -83,9 +82,9 @@ fun defaultEditableSteps(): List<EditablePracticeStep> = DefaultStepPresets.mapI
 
 fun defaultEditableBlock(): EditablePracticeBlock = EditablePracticeBlock(
     id = "block-main",
-    title = "Main cycle",
-    targetMode = BuilderTargetMode.DurationMinutes,
-    targetValueInput = "5",
+    title = "Stage cycle",
+    targetMode = BuilderTargetMode.Repetitions,
+    targetValueInput = "10",
     steps = defaultEditableSteps(),
 )
 
@@ -163,7 +162,7 @@ fun EditablePracticeBlock.summaryLabel(): String {
     if (cadence.isBlank()) return "Enter valid step durations."
 
     val targetSummary = when (targetMode) {
-        BuilderTargetMode.DurationMinutes -> targetValueInput.trim().toIntOrNull()?.let { "$it min" }
+        BuilderTargetMode.DurationMinutes -> targetValueInput.trim().toIntOrNull()?.let { "~$it min desired" }
         BuilderTargetMode.Repetitions -> targetValueInput.trim().toIntOrNull()?.let { "$it rounds" }
     } ?: "set target"
     return "$cadence • $targetSummary"
@@ -177,7 +176,18 @@ fun EditablePracticeBlock.cycleDurationMillisOrNull(): Long? {
 fun EditablePracticeBlock.estimatedBlockDurationMillisOrNull(): Long? {
     val cycleDurationMillis = cycleDurationMillisOrNull() ?: return null
     return when (targetMode) {
-        BuilderTargetMode.DurationMinutes -> targetValueInput.trim().toIntOrNull()?.coerceAtLeast(1)?.times(60_000L)
+        BuilderTargetMode.DurationMinutes -> targetValueInput.trim()
+            .toIntOrNull()
+            ?.coerceAtLeast(1)
+            ?.times(60_000L)
+            ?.let { desiredDurationMillis ->
+                val remainder = desiredDurationMillis % cycleDurationMillis
+                if (remainder == 0L) {
+                    desiredDurationMillis
+                } else {
+                    desiredDurationMillis - remainder + cycleDurationMillis
+                }
+            }
         BuilderTargetMode.Repetitions -> targetValueInput.trim().toIntOrNull()?.coerceAtLeast(1)?.times(cycleDurationMillis)
     }
 }

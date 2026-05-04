@@ -24,10 +24,36 @@ fun buildExecutableSessionPlan(
 
 fun buildExecutableSessionPlan(
     practice: BreathPractice,
+    authoredDefinition: AuthoredPracticeDefinition,
+    durationMinutes: Int,
+    visualMode: BreathingVisualMode = practice.preferredVisualMode,
+): ExecutableSessionPlan = buildExecutableSessionPlan(
+    practice = practice,
+    authoredDefinition = authoredDefinition,
+    runTarget = SessionRunTarget.Timed(durationMinutes),
+    visualMode = visualMode,
+)
+
+fun buildExecutableSessionPlan(
+    practice: BreathPractice,
     runTarget: SessionRunTarget,
     visualMode: BreathingVisualMode = practice.preferredVisualMode,
 ): ExecutableSessionPlan {
-    val templateSteps = buildTemplateSteps(practice.toAuthoredPracticeDefinition())
+    return buildExecutableSessionPlan(
+        practice = practice,
+        authoredDefinition = practice.toAuthoredPracticeDefinition(),
+        runTarget = runTarget,
+        visualMode = visualMode,
+    )
+}
+
+fun buildExecutableSessionPlan(
+    practice: BreathPractice,
+    authoredDefinition: AuthoredPracticeDefinition,
+    runTarget: SessionRunTarget,
+    visualMode: BreathingVisualMode = practice.preferredVisualMode,
+): ExecutableSessionPlan {
+    val templateSteps = buildTemplateSteps(authoredDefinition)
     val executableSteps = when (runTarget) {
         is SessionRunTarget.Timed -> buildTimedSteps(
             templateSteps = templateSteps,
@@ -38,7 +64,7 @@ fun buildExecutableSessionPlan(
             cycles = runTarget.cycles.coerceAtLeast(1),
         )
     }
-    val totalDurationMillis = executableSteps.sumOf { it.durationMillis }.coerceAtLeast(MillisPerSecond)
+    val totalDurationMillis = executableSteps.sumOf { it.durationMillis }
 
     return ExecutableSessionPlan(
         practice = practice,
@@ -92,15 +118,20 @@ private fun buildTimedSteps(
 ): List<ExecutableBreathStep> {
     val executableSteps = mutableListOf<ExecutableBreathStep>()
     var elapsed = 0L
+    var sessionCycleIndex = 0
 
     while (elapsed < totalDurationMillis) {
         templateSteps.forEach { template ->
             if (elapsed >= totalDurationMillis) return@forEach
             val remaining = totalDurationMillis - elapsed
             val duration = minOf(template.durationMillis, remaining)
-            executableSteps += template.copy(durationMillis = duration)
+            executableSteps += template.copy(
+                durationMillis = duration,
+                sessionCycleIndex = sessionCycleIndex,
+            )
             elapsed += duration
         }
+        sessionCycleIndex += 1
     }
 
     return executableSteps
@@ -114,8 +145,12 @@ private fun buildCycleCountSteps(
         .coerceAtLeast(1)
     val boundedCycles = cycles.coerceIn(1, maximumCyclesForTemplate)
     return buildList {
-        repeat(boundedCycles) {
-            addAll(templateSteps)
+        repeat(boundedCycles) { sessionCycleIndex ->
+            addAll(
+                templateSteps.map { template ->
+                    template.copy(sessionCycleIndex = sessionCycleIndex)
+                },
+            )
         }
     }
 }
@@ -165,7 +200,6 @@ fun advanceSession(
     }
 }
 
-private const val MillisPerSecond = 1_000L
 private const val MillisPerMinute = 60_000L
 private const val MaximumSessionMinutes = 240
 private const val MaximumGeneratedExecutableSteps = 20_000

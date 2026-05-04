@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ponderingsilver.breathstudio.data.practice.PracticeLibraryEntry
@@ -53,6 +54,7 @@ fun PracticeHomeScreen(
     onStartSession: (BreathPractice) -> Unit,
     onAddPreset: () -> Unit,
     onCreateCustomPractice: () -> Unit,
+    onCopyPractice: (String) -> Unit,
     onEditPractice: (String) -> Unit,
     onDeleteSelectedPractice: () -> Unit,
     canManageSelectedPractice: Boolean,
@@ -110,7 +112,7 @@ fun PracticeHomeScreen(
             Spacer(modifier = Modifier.height(14.dp))
             if (entries.isEmpty()) {
                 EmptyLibraryCard(
-                    title = "Your library is empty.",
+                    title = "Your studio is quiet. Start by adding a preset.",
                     subtitle = "Add a preset or create a custom session to start building it.",
                 )
             } else {
@@ -128,6 +130,11 @@ fun PracticeHomeScreen(
                             },
                             onBegin = if (isSelected) {
                                 { onStartSession(practice) }
+                            } else {
+                                null
+                            },
+                            onCopy = if (isSelected) {
+                                { onCopyPractice(practice.safeId) }
                             } else {
                                 null
                             },
@@ -285,25 +292,14 @@ private fun HomeHero(
             .padding(24.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Surface(
-                color = Color(0x18FFFFFF),
-                contentColor = Color(0xFFF6EEDB),
-                shape = RoundedCornerShape(999.dp),
-            ) {
-                Text(
-                    text = "Breath Studio",
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
             Text(
-                text = "A breathing app, not a wellness catalog.",
+                text = "Breath Studio.",
                 style = MaterialTheme.typography.displaySmall,
                 color = Color(0xFFF9F4E8),
                 lineHeight = 46.sp,
             )
             Text(
-                text = "Start quickly, follow strong motion, and build toward richer practices without making the app feel technical.",
+                text = "Designed for practice, crafted with intention, given with love.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color(0xD6EBF1ED),
                 lineHeight = 24.sp,
@@ -314,7 +310,7 @@ private fun HomeHero(
                 shape = RoundedCornerShape(24.dp),
             ) {
                 Text(
-                    text = selectedPractice?.let { "Selected now: ${it.safeTitle}" } ?: "Build a library you can actually reuse",
+                    text = selectedPractice?.let { "Next Practice: ${it.safeTitle}" } ?: "Build a library you can actually reuse",
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                     style = MaterialTheme.typography.titleSmall,
                 )
@@ -349,6 +345,7 @@ internal fun PracticeCard(
     canEdit: Boolean,
     onClick: () -> Unit,
     onBegin: (() -> Unit)? = null,
+    onCopy: (() -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
 ) {
     val accent = when (practice.safeCategory) {
@@ -404,17 +401,22 @@ internal fun PracticeCard(
                 color = Color(0xDCE7EFEC),
                 lineHeight = 23.sp,
             )
+            SelectionPill(
+                text = practice.safeCategory,
+                modifier = Modifier.fillMaxWidth(),
+            )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.Bottom,
             ) {
-                SelectionPill(text = "${practice.stages.size} stage${if (practice.stages.size == 1) "" else "s"}")
-                SelectionPill(text = practice.safeCategory)
-                if (onBegin != null) {
-                    ActionPillButton(text = "Begin", onClick = onBegin)
+                if (onCopy != null) {
+                    ActionPillButton(text = "Copy", onClick = onCopy)
                 }
                 if (canEdit && onEdit != null) {
                     ActionPillButton(text = "Edit", onClick = onEdit)
+                }
+                if (onBegin != null) {
+                    ActionPillButton(text = "Begin", onClick = onBegin)
                 }
             }
         }
@@ -437,6 +439,8 @@ private fun ActionPillButton(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             style = MaterialTheme.typography.labelLarge,
             color = Color(0xFFF4DEB5),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

@@ -14,6 +14,7 @@ import com.ponderingsilver.breathstudio.domain.model.StepSound
 import java.util.Random
 import kotlin.concurrent.thread
 import kotlin.math.PI
+import kotlin.math.exp
 import kotlin.math.sin
 
 interface CueController {
@@ -80,9 +81,10 @@ private class BreathSoundPlayer {
         playAsync {
             when (sound) {
                 StepSound.Default -> generateTone(
-                    durationMillis = SoftCueMillis,
-                    frequencies = doubleArrayOf(392.0),
-                    volume = SoftToneVolume,
+                    durationMillis = DefaultCueMillis,
+                    frequencies = doubleArrayOf(261.63, 392.0, 523.25, 659.25),
+                    volume = BellToneVolume,
+                    envelope = ::bellEnvelope,
                 )
                 StepSound.Inhale -> generateBreath(
                     durationMillis = safeDurationMillis,
@@ -116,7 +118,8 @@ private class BreathSoundPlayer {
             generateTone(
                 durationMillis = CompletionCueMillis,
                 frequencies = doubleArrayOf(392.0, 523.25, 659.25),
-                volume = SoftToneVolume,
+                volume = BellToneVolume,
+                envelope = ::bellEnvelope,
             )
         }
     }
@@ -208,17 +211,18 @@ private fun generateTone(
     durationMillis: Long,
     frequencies: DoubleArray,
     volume: Double,
+    envelope: (Double) -> Double = ::fadeEnvelope,
 ): ByteArray {
     val sampleCount = ((durationMillis * SampleRate) / 1_000L).toInt().coerceAtLeast(1)
     val bytes = ByteArray(sampleCount * BytesPerSample)
 
     repeat(sampleCount) { index ->
         val progress = index.toDouble() / sampleCount.toDouble()
-        val envelope = fadeEnvelope(progress)
+        val amplitude = envelope(progress)
         val mixed = frequencies.sumOf { frequency ->
             sin(2.0 * PI * frequency * index.toDouble() / SampleRate)
         } / frequencies.size.toDouble()
-        bytes.writeSample(index, mixed * volume * envelope)
+        bytes.writeSample(index, mixed * volume * amplitude)
     }
     return bytes
 }
@@ -247,13 +251,25 @@ private fun fadeEnvelope(progress: Double): Double {
     return minOf(fadeIn, fadeOut)
 }
 
+private fun bellEnvelope(progress: Double): Double {
+    val attack = (progress / BellAttackPortion).coerceIn(0.0, 1.0)
+    val decay = exp(-BellDecayRate * progress)
+    val release = ((1.0 - progress) / BellReleasePortion).coerceIn(0.0, 1.0)
+    return attack * decay * release
+}
+
 private const val SampleRate = 22_050
 private const val BytesPerSample = 2
 private const val MinimumGeneratedMillis = 120L
 private const val MaximumGeneratedMillis = 120_000L
 private const val SoftCueMillis = 760L
+private const val DefaultCueMillis = 1_250L
 private const val CompletionCueMillis = 1_100L
 private const val FadePortion = 0.08
+private const val BellAttackPortion = 0.02
+private const val BellReleasePortion = 0.12
+private const val BellDecayRate = 4.4
 private const val BreathVolume = 0.26
+private const val BellToneVolume = 0.16
 private const val SoftToneVolume = 0.18
 private const val SofterToneVolume = 0.14

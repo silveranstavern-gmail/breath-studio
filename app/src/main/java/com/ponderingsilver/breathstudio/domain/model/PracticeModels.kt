@@ -109,6 +109,7 @@ data class ExecutableBreathStep(
     val stageTitle: String,
     val roundInStage: Int,
     val stepIndexInCycle: Int,
+    val sessionCycleIndex: Int = 0,
 )
 
 data class ExecutableSessionPlan(
@@ -124,6 +125,7 @@ data class ExecutableSessionPlan(
 }
 
 enum class SessionStatus {
+    Preparing,
     Running,
     Paused,
     Complete,
@@ -135,6 +137,7 @@ data class PlayerSessionState(
     val elapsedSessionMillis: Long = 0L,
     val currentStepIndex: Int = 0,
     val remainingStepMillis: Long = plan.steps.first().durationMillis,
+    val orientationRemainingMillis: Long = 0L,
 ) {
     val currentStep: ExecutableBreathStep
         get() = plan.steps[currentStepIndex]
@@ -147,6 +150,7 @@ data class PlayerSessionState(
 
     val currentStepProgress: Float
         get() = when {
+            status == SessionStatus.Preparing -> 0f
             currentStepDurationMillis <= 0L -> 1f
             status == SessionStatus.Complete -> 1f
             else -> (1f - (remainingStepMillis.toFloat() / currentStepDurationMillis.toFloat())).coerceIn(0f, 1f)
@@ -175,25 +179,31 @@ data class PlayerSessionState(
 
     val currentStageProgress: Float
         get() {
-            val stageSteps = plan.steps.filter { it.stageIndex == currentStep.stageIndex }
+            val stageSteps = currentStageSteps()
             val stageDuration = stageSteps.sumOf { it.durationMillis }.toFloat()
             if (stageDuration <= 0f) return 1f
 
-            val stageStartIndex = stageSteps.firstOrNull()?.let { first ->
-                plan.steps.indexOfFirst { candidate ->
-                    candidate.stageIndex == first.stageIndex &&
-                        candidate.roundInStage == first.roundInStage &&
-                        candidate.stepIndexInCycle == first.stepIndexInCycle
-                }
-            } ?: return 0f
+            val stageStartIndex = plan.steps.indexOf(stageSteps.first())
+            if (stageStartIndex < 0) return 0f
+
             val completedMillisBeforeStage = plan.steps.take(stageStartIndex).sumOf { it.durationMillis }.toFloat()
             val elapsedInStage = (elapsedSessionMillis.toFloat() - completedMillisBeforeStage).coerceIn(0f, stageDuration)
             return (elapsedInStage / stageDuration).coerceIn(0f, 1f)
         }
 
+    private fun currentStageSteps(): List<ExecutableBreathStep> {
+        return plan.steps.filter { step ->
+            step.stageIndex == currentStep.stageIndex &&
+                step.sessionCycleIndex == currentStep.sessionCycleIndex
+        }
+    }
+
     private fun currentStageCycleSteps(): List<ExecutableBreathStep> {
-        val stageId = currentStep.stageIndex to currentStep.roundInStage
-        return plan.steps.filter { it.stageIndex == stageId.first && it.roundInStage == stageId.second }
+        return plan.steps.filter { step ->
+            step.stageIndex == currentStep.stageIndex &&
+                step.roundInStage == currentStep.roundInStage &&
+                step.sessionCycleIndex == currentStep.sessionCycleIndex
+        }
     }
 }
 
@@ -225,19 +235,7 @@ fun normalizeColorHexOrDefault(value: String?, label: String): String {
 }
 
 fun resolveStepSound(sound: StepSound, label: String): StepSound {
-    if (sound != StepSound.Default) return sound
-    return defaultStepSoundForLabel(label)
-}
-
-fun defaultStepSoundForLabel(label: String): StepSound {
-    val key = label.trim().lowercase()
-    return when {
-        "inhale" in key -> StepSound.Inhale
-        "exhale" in key || "ease out" in key -> StepSound.Exhale
-        "hold" in key || "retention" in key -> StepSound.Hold
-        "rest" in key || "pause" in key || "recover" in key -> StepSound.Other1
-        else -> StepSound.Other2
-    }
+    return sound
 }
 
 fun parseStepSound(value: String?): StepSound {

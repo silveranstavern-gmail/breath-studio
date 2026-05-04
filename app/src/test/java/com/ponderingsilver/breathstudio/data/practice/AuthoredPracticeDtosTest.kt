@@ -124,7 +124,31 @@ class AuthoredPracticeDtosTest {
     }
 
     @Test
-    fun mapperFallsBackToLabelBasedSoundForUnknownStepSound() {
+    fun mapperPreservesExplicitDefaultStepSound() {
+        val practice = validDto(
+            blocks = listOf(
+                AuthoredPracticeBlockDto(
+                    kind = AuthoredPracticeBlockDto.KindRepeatingCycle,
+                    target = AuthoredBlockTargetDto.repetitions(1),
+                    cycle = AuthoredPracticeCycleDto(
+                        steps = listOf(
+                            AuthoredPracticeStepDto(
+                                durationMillis = 4_000L,
+                                label = "Inhale",
+                                soundName = StepSound.Default.name,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ).toDomainOrNull()
+
+        assertNotNull(practice)
+        assertEquals(StepSound.Default, requireNotNull(practice).stages.first().cycle.steps.first().resolvedSound)
+    }
+
+    @Test
+    fun mapperFallsBackToDefaultSoundForUnknownStepSound() {
         val practice = validDto(
             blocks = listOf(
                 AuthoredPracticeBlockDto(
@@ -144,7 +168,7 @@ class AuthoredPracticeDtosTest {
         ).toDomainOrNull()
 
         assertNotNull(practice)
-        assertEquals(StepSound.Exhale, requireNotNull(practice).stages.first().cycle.steps.first().resolvedSound)
+        assertEquals(StepSound.Default, requireNotNull(practice).stages.first().cycle.steps.first().resolvedSound)
     }
 
     private fun validDto(

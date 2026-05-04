@@ -1,5 +1,6 @@
 package com.ponderingsilver.breathstudio
 
+import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.BreathPractice
 import com.ponderingsilver.breathstudio.domain.model.BreathingVisualMode
 
@@ -20,16 +21,19 @@ data class SessionConfig(
     val durationMinutes: Int,
     val cues: CueSettings,
     val visualMode: BreathingVisualMode,
+    val authoredDefinition: AuthoredPracticeDefinition? = null,
 ) {
     companion object {
         fun fromPractice(
             practice: BreathPractice,
             cues: CueSettings = CueSettings.Defaults,
+            authoredDefinition: AuthoredPracticeDefinition? = null,
         ): SessionConfig = SessionConfig(
             practice = practice,
             durationMinutes = practice.safeDefaultDurationMinutes,
             cues = cues,
             visualMode = practice.preferredVisualMode,
+            authoredDefinition = authoredDefinition,
         )
     }
 }

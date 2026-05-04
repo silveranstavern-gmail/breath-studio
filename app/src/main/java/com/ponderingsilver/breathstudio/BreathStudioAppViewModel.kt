@@ -58,12 +58,20 @@ class BreathStudioAppViewModel(
     }
 
     fun startSelectedPractice() {
-        val selectedPractice = appState.value.selectedEntry?.practice ?: return
-        startPractice(selectedPractice)
+        val selectedEntry = appState.value.selectedEntry ?: return
+        startPractice(selectedEntry.practice)
     }
 
     fun startPractice(practice: BreathPractice) {
-        route.value = BreathStudioRoute.Player(config = SessionConfig.fromPractice(practice))
+        val entry = appState.value.entries.firstOrNull { libraryEntry ->
+            libraryEntry.practice.safeId == practice.safeId
+        }
+        route.value = BreathStudioRoute.Player(
+            config = SessionConfig.fromPractice(
+                practice = entry?.practice ?: practice,
+                authoredDefinition = entry?.authoredDefinition,
+            ),
+        )
     }
 
     fun openPresetPicker() {
@@ -87,6 +95,20 @@ class BreathStudioAppViewModel(
         route.value = BreathStudioRoute.Builder(
             initialDefinition = authoredDefinition,
         )
+    }
+
+    fun copyPractice(practiceId: String) {
+        val entry = appState.value.entries
+            .firstOrNull { libraryEntry -> libraryEntry.practice.safeId == practiceId }
+            ?: return
+        viewModelScope.launch {
+            val dto = entry.toTemplateCopyDto()
+            val saved = appContainer.savedPracticeStore.upsertPractice(dto)
+            if (saved) {
+                appContainer.userPreferencesRepository.setSelectedPracticeId(dto.id)
+                route.value = BreathStudioRoute.Home
+            }
+        }
     }
 
     fun addPresetToLibrary(practice: BreathPractice) {
@@ -141,6 +163,15 @@ private fun BreathPractice.toTemplateCopyDto(): AuthoredPracticeDto {
         .take(MaxTemplateBaseIdLength)
     val suffix = UUID.randomUUID().toString().replace("-", "").take(12)
     return toAuthoredDto().copy(id = "$base-$suffix")
+}
+
+private fun PracticeLibraryEntry.toTemplateCopyDto(): AuthoredPracticeDto {
+    val base = practice.safeId
+        .ifBlank { "practice" }
+        .take(MaxTemplateBaseIdLength)
+    val suffix = UUID.randomUUID().toString().replace("-", "").take(12)
+    val dto = authoredDefinition?.toAuthoredDto() ?: practice.toAuthoredDto()
+    return dto.copy(id = "$base-$suffix")
 }
 
 private const val MaxTemplateBaseIdLength = 96

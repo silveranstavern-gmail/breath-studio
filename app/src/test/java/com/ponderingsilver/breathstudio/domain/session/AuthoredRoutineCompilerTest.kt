@@ -82,7 +82,7 @@ class AuthoredRoutineCompilerTest {
             ),
         )
 
-        assertEquals(listOf(StepSound.Inhale, StepSound.Other2), steps.map { it.sound })
+        assertEquals(listOf(StepSound.Default, StepSound.Other2), steps.map { it.sound })
     }
 
     private fun testDefinition(

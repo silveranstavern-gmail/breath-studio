@@ -169,7 +169,11 @@ private fun PlayerHero(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = if (sessionState.status == SessionStatus.Complete) "Practice complete" else sessionState.currentStep.stageTitle,
+                    text = when (sessionState.status) {
+                        SessionStatus.Preparing -> "Get oriented"
+                        SessionStatus.Complete -> "Practice complete"
+                        else -> sessionState.currentStep.stageTitle
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     color = Color(0xD5F4EFE2),
                 )
@@ -198,19 +202,30 @@ private fun PlayerHero(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = if (sessionState.status == SessionStatus.Complete) "Rest" else sessionState.currentLabel,
+                        text = when (sessionState.status) {
+                            SessionStatus.Preparing -> "Get ready"
+                            SessionStatus.Complete -> "Rest"
+                            else -> sessionState.currentLabel
+                        },
                         style = MaterialTheme.typography.displayMedium,
                         textAlign = TextAlign.Center,
                         color = Color(0xFFF9F4E9),
                     )
                     Text(
-                        text = if (sessionState.status == SessionStatus.Complete) "Finished" else formatSeconds(sessionState.remainingStepMillis),
+                        text = when (sessionState.status) {
+                            SessionStatus.Preparing -> formatSeconds(sessionState.orientationRemainingMillis)
+                            SessionStatus.Complete -> "Finished"
+                            else -> formatSeconds(sessionState.remainingStepMillis)
+                        },
                         style = MaterialTheme.typography.headlineMedium,
                         textAlign = TextAlign.Center,
                         color = Color(0xFFEFD7A8),
                     )
                     Text(
-                        text = "${sessionState.currentStep.stageTitle} • ${formatClock(sessionState.elapsedSessionMillis)} elapsed",
+                        text = when (sessionState.status) {
+                            SessionStatus.Preparing -> "First cue starts after orientation"
+                            else -> "${sessionState.currentStep.stageTitle} • ${formatClock(sessionState.elapsedSessionMillis)} elapsed"
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = Color(0xCCE3EBE8),
@@ -240,11 +255,11 @@ private fun PlayerStats(
         )
         StatCard(
             modifier = Modifier.weight(1f),
-            title = "Cues",
+            title = "Sensory",
             value = buildString {
-                append(if (soundEnabled) "Tone" else "Silent")
-                append(" + ")
-                append(if (hapticsEnabled) "Touch" else "Still")
+                append(if (soundEnabled) "Audio" else "Silent")
+                append(" & ")
+                append(if (hapticsEnabled) "Haptic" else "Still")
             },
             caption = sessionState.plan.practice.safeCategory,
         )
@@ -309,6 +324,7 @@ private fun PlayerControls(
         ) {
             Text(
                 text = when (sessionState.status) {
+                    SessionStatus.Preparing -> "Start now"
                     SessionStatus.Running -> "Pause practice"
                     SessionStatus.Paused -> "Resume practice"
                     SessionStatus.Complete -> "Start again"

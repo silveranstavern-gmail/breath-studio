@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import com.ponderingsilver.breathstudio.domain.model.defaultColorHexForLabel
 import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrNull
 import com.ponderingsilver.breathstudio.domain.model.StepSound
-import com.ponderingsilver.breathstudio.ui.components.SelectionPill
 
 @Composable
 fun BuilderHeader(
@@ -163,13 +162,20 @@ fun BlockSummaryCard(
                     )
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SelectionPill(
-                    text = block.cycleDurationMillisOrNull()?.let(::formatDurationMinutesSeconds) ?: "Invalid cycle",
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                val cycleDuration =
+                    block.cycleDurationMillisOrNull()?.let(::formatDurationMinutesSeconds) ?: "Invalid"
+                val totalStageDuration =
+                    block.estimatedBlockDurationMillisOrNull()?.let(::formatDurationMinutesSeconds) ?: "Invalid"
+                Text(
+                    text = "Cycle Duration: $cycleDuration",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color(0xFFEFDDB4),
                 )
-                SelectionPill(
-                    text = block.estimatedBlockDurationMillisOrNull()?.let(::formatDurationMinutesSeconds)
-                        ?: "Invalid block",
+                Text(
+                    text = "Total Stage Duration: $totalStageDuration",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color(0xFFEFDDB4),
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -299,7 +305,7 @@ fun StepEditorCard(
                         BuilderChoiceChip(
                             title = sound.label,
                             caption = when (sound) {
-                                StepSound.Default -> "Infer from label"
+                                StepSound.Default -> "Soft bell"
                                 StepSound.Inhale -> "Breath in"
                                 StepSound.Exhale -> "Breath out"
                                 StepSound.Hold -> "Hold cue"

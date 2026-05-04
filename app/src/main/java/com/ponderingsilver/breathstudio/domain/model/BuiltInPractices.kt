@@ -5,19 +5,19 @@ object BuiltInPractices {
         id = "box",
         title = "Box Breathing",
         subtitle = "Steady focus",
-        description = "A four-sided breath for balance and concentration, guided by a soft visual glow.",
+        description = "Find your center with equal parts breath and pause. A steady anchor for focus.",
         category = "Reset",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
-                title = "Main cycle",
+                title = "Stage cycle",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Inhale"),
-                        PracticeStep(durationSeconds = 4, label = "Hold In"),
-                        PracticeStep(durationSeconds = 4, label = "Exhale"),
-                        PracticeStep(durationSeconds = 4, label = "Hold Out"),
+                        PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 4, label = "Hold In", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 4, label = "Exhale", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 4, label = "Hold Out", sound = StepSound.Hold),
                     ),
                 ),
             ),
@@ -28,18 +28,18 @@ object BuiltInPractices {
         id = "four-seven-eight",
         title = "4-7-8",
         subtitle = "Long release",
-        description = "A classic calming ratio with a longer hold and a fuller exhale.",
+        description = "A rhythmic descent into stillness. Quiet the nervous system with a long, controlled release.",
         category = "Calming",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
-                title = "Main cycle",
+                title = "Stage cycle",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Inhale"),
-                        PracticeStep(durationSeconds = 7, label = "Hold In"),
-                        PracticeStep(durationSeconds = 8, label = "Exhale"),
+                        PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 7, label = "Hold In", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 8, label = "Exhale", sound = StepSound.Exhale),
                     ),
                 ),
             ),
@@ -50,18 +50,18 @@ object BuiltInPractices {
         id = "extended-exhale",
         title = "Extended Exhale",
         subtitle = "Gentle reset",
-        description = "A softer downshift with a longer exhale and a lighter internal pause.",
+        description = "Gently downshift. A soft practice focusing on the soothing power of a long exhale.",
         category = "Reset",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
             PracticeStage(
-                title = "Main cycle",
+                title = "Stage cycle",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Inhale"),
-                        PracticeStep(durationSeconds = 2, label = "Hold In"),
-                        PracticeStep(durationSeconds = 6, label = "Exhale"),
+                        PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 2, label = "Hold In", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 6, label = "Exhale", sound = StepSound.Exhale),
                     ),
                 ),
             ),
@@ -81,8 +81,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(3),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Inhale"),
-                        PracticeStep(durationSeconds = 6, label = "Exhale"),
+                        PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 6, label = "Exhale", sound = StepSound.Exhale),
                     ),
                 ),
             ),
@@ -91,8 +91,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(3),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Inhale"),
-                        PracticeStep(durationSeconds = 8, label = "Exhale"),
+                        PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 8, label = "Exhale", sound = StepSound.Exhale),
                     ),
                 ),
             ),
@@ -101,8 +101,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(3),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Inhale"),
-                        PracticeStep(durationSeconds = 10, label = "Exhale"),
+                        PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 10, label = "Exhale", sound = StepSound.Exhale),
                     ),
                 ),
             ),
@@ -123,14 +123,14 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 5, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 5, label = "Block and Hold Out", colorHex = "#BFC9D4"),
-                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 5, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 5, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 5, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Exhale", colorHex = "#6FCF97", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
                     ),
                 ),
             ),
@@ -151,14 +151,14 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 10, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 10, label = "Block and Hold Out", colorHex = "#BFC9D4"),
-                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 10, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 5, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 10, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Exhale", colorHex = "#6FCF97", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
                     ),
                 ),
             ),
@@ -179,14 +179,14 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 15, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 10, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 15, label = "Block and Hold Out", colorHex = "#BFC9D4"),
-                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 15, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 10, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 15, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 10, label = "Right Nostril Exhale", colorHex = "#6BA8FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 10, label = "Left Nostril Exhale", colorHex = "#6FCF97", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
                     ),
                 ),
             ),
@@ -207,10 +207,10 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 2, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 7, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
-                        PracticeStep(durationSeconds = 2, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 7, label = "Left Nostril Exhale", colorHex = "#6FCF97", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
                     ),
                 ),
             ),
@@ -231,10 +231,10 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 2, label = "Block and Hold In", colorHex = "#E2C27B"),
-                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
-                        PracticeStep(durationSeconds = 2, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold In", colorHex = "#E2C27B", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold Out", colorHex = "#BFC9D4", sound = StepSound.Hold),
                     ),
                 ),
             ),
@@ -255,9 +255,9 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Nasal Inhale", colorHex = "#7ED9C8"),
-                        PracticeStep(durationSeconds = 8, label = "Humming Exhale", colorHex = "#E6B86A"),
-                        PracticeStep(durationSeconds = 2, label = "Quiet Pause", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 4, label = "Nasal Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 8, label = "Humming Exhale", colorHex = "#E6B86A", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 2, label = "Quiet Pause", colorHex = "#BFC9D4", sound = StepSound.Other2),
                     ),
                 ),
             ),
@@ -278,8 +278,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 6, label = "Ocean Inhale", colorHex = "#7ED9C8"),
-                        PracticeStep(durationSeconds = 6, label = "Ocean Exhale", colorHex = "#9BC1FF"),
+                        PracticeStep(durationSeconds = 6, label = "Ocean Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 6, label = "Ocean Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
                     ),
                 ),
             ),
@@ -300,8 +300,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(15),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 2, label = "Power Inhale", colorHex = "#7ED9C8"),
-                        PracticeStep(durationSeconds = 2, label = "Power Exhale", colorHex = "#9BC1FF"),
+                        PracticeStep(durationSeconds = 2, label = "Power Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 2, label = "Power Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
                     ),
                 ),
             ),
@@ -310,8 +310,8 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Release Exhale", colorHex = "#9BC1FF"),
-                        PracticeStep(durationSeconds = 30, label = "Hold Out", colorHex = "#C7D7D4"),
+                        PracticeStep(durationSeconds = 4, label = "Release Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 30, label = "Hold Out", colorHex = "#C7D7D4", sound = StepSound.Hold),
                     ),
                 ),
             ),
@@ -320,9 +320,9 @@ object BuiltInPractices {
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
-                        PracticeStep(durationSeconds = 4, label = "Recovery Inhale", colorHex = "#7ED9C8"),
-                        PracticeStep(durationSeconds = 15, label = "Hold In", colorHex = "#E7C98C"),
-                        PracticeStep(durationSeconds = 6, label = "Ease Out", colorHex = "#9BC1FF"),
+                        PracticeStep(durationSeconds = 4, label = "Recovery Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 15, label = "Hold In", colorHex = "#E7C98C", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 6, label = "Ease Out", colorHex = "#9BC1FF", sound = StepSound.Exhale),
                     ),
                 ),
             ),

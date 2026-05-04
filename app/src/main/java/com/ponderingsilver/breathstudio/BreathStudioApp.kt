@@ -46,6 +46,7 @@ fun BreathStudioApp(
                         onStartSession = appViewModel::startPractice,
                         onAddPreset = appViewModel::openPresetPicker,
                         onCreateCustomPractice = appViewModel::createCustomPractice,
+                        onCopyPractice = appViewModel::copyPractice,
                         onEditPractice = appViewModel::editPractice,
                         onDeleteSelectedPractice = appViewModel::deleteSelectedPractice,
                         canManageSelectedPractice = appState.selectedEntry?.canEdit == true,

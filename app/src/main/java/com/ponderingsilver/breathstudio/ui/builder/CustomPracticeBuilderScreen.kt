@@ -240,22 +240,31 @@ fun CustomPracticeBuilderScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         TimingSummaryCard(
                             modifier = Modifier.weight(1f),
-                            title = "Cycle length",
+                            title = "Cycle duration",
                             value = selectedBlock.cycleDurationMillisOrNull()?.let(::formatDurationMinutesSeconds) ?: "Invalid",
                             caption = "${selectedBlock.steps.size} step${if (selectedBlock.steps.size == 1) "" else "s"}",
                         )
                         TimingSummaryCard(
                             modifier = Modifier.weight(1f),
-                            title = "Block estimate",
+                            title = "Total stage duration",
                             value = selectedBlock.estimatedBlockDurationMillisOrNull()?.let(::formatDurationMinutesSeconds) ?: "Invalid",
-                            caption = selectedBlock.summaryLabel(),
+                            caption = if (selectedBlock.targetMode == BuilderTargetMode.DurationMinutes) {
+                                val desiredMinutes = selectedBlock.targetValueInput.trim().toIntOrNull()?.coerceAtLeast(1)
+                                if (desiredMinutes != null) {
+                                    "Desired: ${desiredMinutes}m (actual aligns to full cycle)"
+                                } else {
+                                    "Enter desired minutes"
+                                }
+                            } else {
+                                selectedBlock.summaryLabel()
+                            },
                         )
                     }
                 }
             }
             BuilderSection(
                 title = "Run target",
-                subtitle = "Choose whether the selected block runs for total minutes or a fixed round count.",
+                subtitle = "Use rounds by default. Minutes mode is a desired duration and will round up to a full cycle.",
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(
