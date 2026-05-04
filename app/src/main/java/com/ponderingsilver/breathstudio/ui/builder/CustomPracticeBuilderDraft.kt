@@ -48,9 +48,20 @@ data class EditablePracticeBlock(
 data class CustomPracticeBuilderDraft(
     val practiceId: String? = null,
     val title: String = "",
+    val subtitle: String = "",
+    val description: String = "",
+    val category: String = "",
     val visualMode: BreathingVisualMode = BreathingVisualMode.Glow,
     val blocks: List<EditablePracticeBlock> = listOf(defaultEditableBlock()),
     val selectedBlockId: String = blocks.first().id,
+)
+
+val DefaultPracticeCategories: List<String> = listOf(
+    "Focus",
+    "Calm",
+    "Reset",
+    "Sleep",
+    "Custom",
 )
 
 val CustomPracticeBuilderDraft.hasExistingPractice: Boolean
@@ -111,6 +122,9 @@ fun AuthoredPracticeDefinition.toBuilderDraftOrNull(): CustomPracticeBuilderDraf
     return CustomPracticeBuilderDraft(
         practiceId = safeId,
         title = safeTitle,
+        subtitle = subtitle,
+        description = description,
+        category = category,
         visualMode = preferredVisualMode,
         blocks = editableBlocks,
         selectedBlockId = editableBlocks.first().id,
@@ -127,9 +141,9 @@ fun CustomPracticeBuilderDraft.toAuthoredPracticeDefinitionOrNull(
     return AuthoredPracticeDefinition(
         id = practiceId?.trim().takeUnless { it.isNullOrBlank() } ?: idProvider().trim().ifBlank { "custom-practice" },
         title = practiceTitle,
-        subtitle = draftSubtitle(authoredBlocks),
-        description = draftDescription(authoredBlocks),
-        category = "Custom",
+        subtitle = subtitle.trim().ifBlank { draftSubtitle(authoredBlocks) },
+        description = description.trim().ifBlank { draftDescription(authoredBlocks) },
+        category = category.trim().ifBlank { "Custom" },
         blocks = authoredBlocks,
         preferredVisualMode = visualMode,
         defaultDurationMinutes = suggestedDefaultDurationMinutes(authoredBlocks),

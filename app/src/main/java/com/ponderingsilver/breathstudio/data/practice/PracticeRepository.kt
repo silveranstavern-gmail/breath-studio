@@ -2,7 +2,6 @@ package com.ponderingsilver.breathstudio.data.practice
 
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.model.BreathPractice
-import com.ponderingsilver.breathstudio.domain.model.BuiltInPractices
 import com.ponderingsilver.breathstudio.domain.model.toDomainPracticeOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,16 +23,16 @@ interface PracticeRepository {
 }
 
 class DefaultPracticeRepository(
-    private val builtInPractices: List<BreathPractice> = BuiltInPractices.all,
     savedPracticeDtos: Flow<List<AuthoredPracticeDto>> = MutableStateFlow(emptyList()),
 ) : PracticeRepository {
     override val entries: Flow<List<PracticeLibraryEntry>> = savedPracticeDtos.map { savedDtos ->
-        val builtInEntries = builtInPractices.map { practice ->
-            PracticeLibraryEntry(
-                practice = practice,
-                authoredDefinition = null,
-            )
-        }
+        // Important library invariant:
+        // `entries` must contain only persisted/authored sessions.
+        //
+        // Built-in presets belong in the preset picker and become library items only after they
+        // are saved through the authored-practice path. Re-injecting `BuiltInPractices.all` here
+        // causes a regression where the home screen starts pre-populated and selected presets do
+        // not expose edit/delete because they lack an authored definition.
         val savedEntries = savedDtos.mapNotNull { dto ->
             val definition = dto.toAuthoredDefinitionOrNull() ?: return@mapNotNull null
             val practice = definition.toDomainPracticeOrNull() ?: return@mapNotNull null
@@ -43,7 +42,7 @@ class DefaultPracticeRepository(
             )
         }
 
-        (builtInEntries + savedEntries).dedupeByPracticeId()
+        savedEntries.dedupeByPracticeId()
     }
 
     private fun List<PracticeLibraryEntry>.dedupeByPracticeId(): List<PracticeLibraryEntry> {
@@ -53,4 +52,3 @@ class DefaultPracticeRepository(
         }
     }
 }
-

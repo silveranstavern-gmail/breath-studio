@@ -110,10 +110,236 @@ object BuiltInPractices {
         defaultDurationMinutes = 6,
     )
 
+    val NadiShodhanaL3 = BreathPractice(
+        id = "nadi-shodhana-l3",
+        title = "Nadi Shodhana L3",
+        subtitle = "Alternate nostril balance",
+        description = "A full alternate-nostril cycle with equal inhale, inner hold, exhale, and outer hold. Keep the count smooth and unforced.",
+        category = "Calm",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Full round",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 5, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 20,
+    )
+
+    val NadiShodhanaL4 = BreathPractice(
+        id = "nadi-shodhana-l4",
+        title = "Nadi Shodhana L4",
+        subtitle = "Alternate nostril retention ladder",
+        description = "A longer-hold alternate nostril cycle with steady 5 second inhales and exhales, then 10 second inner and outer retentions.",
+        category = "Focus",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Full round",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 10, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 20,
+    )
+
+    val NadiShodhanaL5 = BreathPractice(
+        id = "nadi-shodhana-l5",
+        title = "Nadi Shodhana L5",
+        subtitle = "Extended alternate nostril holds",
+        description = "A deeper alternate nostril round with longer retentions and a fuller exhale. Only use this level if the breath stays smooth and controlled.",
+        category = "Sleep",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Full round",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 10, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 10, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 15, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 20,
+    )
+
+    val LeftNostrilMoon = BreathPractice(
+        id = "left-nostril-moon",
+        title = "Left Nostril / Moon",
+        subtitle = "Cooling nasal downshift",
+        description = "A single-side nasal practice that stays simple while still giving users a nostril-specific template to modify.",
+        category = "Sleep",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Cooling cycle",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 7, label = "Left Nostril Exhale", colorHex = "#6FCF97"),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 12,
+    )
+
+    val RightNostrilSun = BreathPractice(
+        id = "right-nostril-sun",
+        title = "Right Nostril / Sun",
+        subtitle = "Brightening nasal focus",
+        description = "A one-sided activating nasal pattern that works as a reusable template for energizing focus sessions.",
+        category = "Focus",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Activating cycle",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold In", colorHex = "#E2C27B"),
+                        PracticeStep(durationSeconds = 5, label = "Right Nostril Exhale", colorHex = "#6BA8FF"),
+                        PracticeStep(durationSeconds = 2, label = "Block and Hold Out", colorHex = "#BFC9D4"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 12,
+    )
+
+    val Bhramari = BreathPractice(
+        id = "bhramari",
+        title = "Bhramari",
+        subtitle = "Humming exhale meditation",
+        description = "A calming humming-breath template with a long resonant exhale and a gentle pause between rounds.",
+        category = "Calm",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Humming cycle",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Nasal Inhale", colorHex = "#7ED9C8"),
+                        PracticeStep(durationSeconds = 8, label = "Humming Exhale", colorHex = "#E6B86A"),
+                        PracticeStep(durationSeconds = 2, label = "Quiet Pause", colorHex = "#BFC9D4"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 10,
+    )
+
+    val Ujjayi = BreathPractice(
+        id = "ujjayi",
+        title = "Ujjayi",
+        subtitle = "Ocean-breath concentration",
+        description = "A steady ocean-breath rhythm with matched inhale and exhale, useful as a strong base template for meditative pacing.",
+        category = "Focus",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Ocean cycle",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 6, label = "Ocean Inhale", colorHex = "#7ED9C8"),
+                        PracticeStep(durationSeconds = 6, label = "Ocean Exhale", colorHex = "#9BC1FF"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 12,
+    )
+
+    val PowerBreathRetention = BreathPractice(
+        id = "power-breath-retention",
+        title = "Power Breath + Retention",
+        subtitle = "Staged energize and reset template",
+        description = "A multi-stage power-breath routine with rhythmic active breathing, a long exhale hold, and a short recovery hold. This is intentionally structured as a more advanced template to tweak.",
+        category = "Custom",
+        preferredVisualMode = BreathingVisualMode.Glow,
+        stages = listOf(
+            PracticeStage(
+                title = "Build",
+                target = PracticeStageTarget.Rounds(15),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 2, label = "Power Inhale", colorHex = "#7ED9C8"),
+                        PracticeStep(durationSeconds = 2, label = "Power Exhale", colorHex = "#9BC1FF"),
+                    ),
+                ),
+            ),
+            PracticeStage(
+                title = "Hold Out",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Release Exhale", colorHex = "#9BC1FF"),
+                        PracticeStep(durationSeconds = 30, label = "Hold Out", colorHex = "#C7D7D4"),
+                    ),
+                ),
+            ),
+            PracticeStage(
+                title = "Recovery",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Recovery Inhale", colorHex = "#7ED9C8"),
+                        PracticeStep(durationSeconds = 15, label = "Hold In", colorHex = "#E7C98C"),
+                        PracticeStep(durationSeconds = 6, label = "Ease Out", colorHex = "#9BC1FF"),
+                    ),
+                ),
+            ),
+        ),
+        defaultDurationMinutes = 15,
+    )
+
     val all: List<BreathPractice> = listOf(
-        BoxBreathing,
         FourSevenEight,
         ExtendedExhale,
-        ExhaleLadder,
+        NadiShodhanaL3,
+        NadiShodhanaL4,
+        NadiShodhanaL5,
+        LeftNostrilMoon,
+        RightNostrilSun,
+        Bhramari,
+        Ujjayi,
+        PowerBreathRetention,
     )
 }

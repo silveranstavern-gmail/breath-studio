@@ -100,6 +100,52 @@ fun CustomPracticeBuilderScreen(
                 )
             }
             BuilderSection(
+                title = "Library details",
+                subtitle = "These are the labels the library uses, so presets and custom sessions can carry the same kind of metadata.",
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        DefaultPracticeCategories.forEach { presetCategory ->
+                            BuilderChoiceChip(
+                                title = presetCategory,
+                                caption = if (draft.category.trim().equals(presetCategory, ignoreCase = true)) "Selected" else "Library label",
+                                selected = draft.category.trim().equals(presetCategory, ignoreCase = true),
+                                onClick = {
+                                    draft = draft.copy(category = presetCategory)
+                                },
+                            )
+                        }
+                    }
+                    OutlinedTextField(
+                        value = draft.category,
+                        onValueChange = { draft = draft.copy(category = it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text("Category") },
+                        placeholder = { Text("Focus, Sleep, Reset, Custom...") },
+                    )
+                    OutlinedTextField(
+                        value = draft.subtitle,
+                        onValueChange = { draft = draft.copy(subtitle = it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text("Subtitle") },
+                        placeholder = { Text("Steady focus") },
+                    )
+                    OutlinedTextField(
+                        value = draft.description,
+                        onValueChange = { draft = draft.copy(description = it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        label = { Text("Description") },
+                        placeholder = { Text("A short library description for this session.") },
+                    )
+                }
+            }
+            BuilderSection(
                 title = "Session blocks",
                 subtitle = "Build the routine by stacking simple repeating cycles. Duplicate and tweak instead of rebuilding.",
             ) {
