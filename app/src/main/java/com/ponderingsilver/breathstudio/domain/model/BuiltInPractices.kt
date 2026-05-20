@@ -353,7 +353,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 2,
     )
 
     val all: List<BreathPractice> = listOf(

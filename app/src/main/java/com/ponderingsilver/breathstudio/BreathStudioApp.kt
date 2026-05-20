@@ -15,6 +15,7 @@ import com.ponderingsilver.breathstudio.ui.builder.CustomPracticeBuilderScreen
 import com.ponderingsilver.breathstudio.ui.home.PresetPickerScreen
 import com.ponderingsilver.breathstudio.ui.home.PracticeHomeScreen
 import com.ponderingsilver.breathstudio.ui.player.PracticePlayerScreen
+import com.ponderingsilver.breathstudio.ui.support.SupportDiagnosticsScreen
 import com.ponderingsilver.breathstudio.ui.support.SupportScreen
 import com.ponderingsilver.breathstudio.ui.theme.BreathStudioTheme
 
@@ -57,6 +58,12 @@ fun BreathStudioApp(
                 BreathStudioRoute.Support -> {
                     SupportScreen(
                         onBack = appViewModel::goHome,
+                        onOpenDiagnostics = appViewModel::openSupportDiagnostics,
+                    )
+                }
+                BreathStudioRoute.SupportDiagnostics -> {
+                    SupportDiagnosticsScreen(
+                        onBack = appViewModel::openSupport,
                     )
                 }
                 BreathStudioRoute.PresetPicker -> {

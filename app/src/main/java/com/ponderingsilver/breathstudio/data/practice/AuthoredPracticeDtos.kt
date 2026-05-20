@@ -70,14 +70,16 @@ data class AuthoredPracticeStepDto(
 data class AuthoredBlockTargetDto(
     val kind: String,
     val value: Long,
+    val targetDurationMillis: Long? = null,
 ) {
     companion object {
         const val KindRepetitions = "repetitions"
         const val KindDurationMillis = "duration_millis"
 
-        fun repetitions(value: Int): AuthoredBlockTargetDto = AuthoredBlockTargetDto(
+        fun repetitions(value: Int, targetDurationMillis: Long? = null): AuthoredBlockTargetDto = AuthoredBlockTargetDto(
             kind = KindRepetitions,
             value = value.toLong(),
+            targetDurationMillis = targetDurationMillis,
         )
 
         fun durationMillis(value: Long): AuthoredBlockTargetDto = AuthoredBlockTargetDto(
@@ -176,7 +178,10 @@ fun AuthoredPracticeDefinition.toAuthoredDto(): AuthoredPracticeDto = AuthoredPr
                 kind = AuthoredPracticeBlockDto.KindRepeatingCycle,
                 title = block.safeTitle,
                 target = when (val target = block.target) {
-                    is AuthoredBlockTarget.Repetitions -> AuthoredBlockTargetDto.repetitions(target.count)
+                    is AuthoredBlockTarget.Repetitions -> AuthoredBlockTargetDto.repetitions(
+                        target.count,
+                        target.fromTargetDurationMillis,
+                    )
                     is AuthoredBlockTarget.DurationMillis -> AuthoredBlockTargetDto.durationMillis(target.durationMillis)
                 },
                 cycle = AuthoredPracticeCycleDto(
@@ -258,7 +263,8 @@ private fun AuthoredBlockTargetDto.toDomainTarget(): AuthoredBlockTarget {
             value.coerceIn(MinimumBlockDurationMillis, MaximumBlockDurationMillis),
         )
         else -> AuthoredBlockTarget.Repetitions(
-            value.coerceIn(MinimumBlockRepetitions.toLong(), MaximumBlockRepetitions.toLong()).toInt(),
+            count = value.coerceIn(MinimumBlockRepetitions.toLong(), MaximumBlockRepetitions.toLong()).toInt(),
+            fromTargetDurationMillis = targetDurationMillis,
         )
     }
 }

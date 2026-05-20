@@ -7,6 +7,7 @@ import com.ponderingsilver.breathstudio.SessionConfig
 import com.ponderingsilver.breathstudio.domain.model.ExecutableBreathStep
 import com.ponderingsilver.breathstudio.domain.model.PlayerSessionState
 import com.ponderingsilver.breathstudio.domain.model.SessionStatus
+import com.ponderingsilver.breathstudio.domain.model.toAuthoredPracticeDefinition
 import com.ponderingsilver.breathstudio.domain.session.advanceSession
 import com.ponderingsilver.breathstudio.domain.session.buildExecutableSessionPlan
 import com.ponderingsilver.breathstudio.domain.session.newPlayerSession
@@ -40,25 +41,15 @@ class PracticePlayerViewModel : ViewModel() {
 
     fun start(config: SessionConfig) {
         val configKey = SessionConfigKey.from(config)
-        if (activeConfigKey == configKey && _sessionState.value != null) {
-            return
-        }
-
+        if (activeConfigKey == configKey && _sessionState.value != null) return
         activeConfigKey = configKey
-        val plan = if (config.authoredDefinition != null) {
-            buildExecutableSessionPlan(
-                practice = config.practice,
-                authoredDefinition = config.authoredDefinition,
-                durationMinutes = config.durationMinutes,
-                visualMode = config.visualMode,
-            )
-        } else {
-            buildExecutableSessionPlan(
-                practice = config.practice,
-                durationMinutes = config.durationMinutes,
-                visualMode = config.visualMode,
-            )
-        }
+
+        val plan = buildExecutableSessionPlan(
+            practice = config.practice,
+            authoredDefinition = config.authoredDefinition ?: config.practice.toAuthoredPracticeDefinition(),
+            runTarget = config.runTarget,
+            visualMode = config.visualMode,
+        )
         _sessionState.value = newPlayerSession(plan).withOrientationDelay()
         startTicker()
     }

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import com.ponderingsilver.breathstudio.ui.theme.isLight
 
 @Composable
 fun BreathingVisual(
@@ -22,14 +23,19 @@ fun BreathingVisual(
         val radius = size.minDimension * 0.52f
         val ringInset = size.minDimension * 0.13f
         val ringBounds = Size(size.width - (ringInset * 2f), size.height - (ringInset * 2f))
+        
+        val isLightColor = stepColor.isLight()
+        val baseAlpha = if (isLightColor) 0.22f else 0.38f
+        val targetAlpha = if (isLightColor) 0.62f else 0.82f
+
         val ringColor = lerp(
-            start = stepColor.copy(alpha = 0.28f),
-            stop = stepColor.copy(alpha = 0.68f),
+            start = stepColor.copy(alpha = baseAlpha),
+            stop = stepColor.copy(alpha = targetAlpha),
             fraction = stageProgress.coerceIn(0f, 1f),
         )
 
         drawCircle(
-            color = stepColor.copy(alpha = 0.08f),
+            color = stepColor.copy(alpha = if (isLightColor) 0.06f else 0.12f),
             center = center,
             radius = radius,
         )

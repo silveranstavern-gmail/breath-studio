@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ponderingsilver.breathstudio.SessionConfig
+import com.ponderingsilver.breathstudio.ui.builder.formatDurationMinutesSeconds
 import com.ponderingsilver.breathstudio.domain.model.PlayerSessionState
 import com.ponderingsilver.breathstudio.domain.model.SessionStatus
 import com.ponderingsilver.breathstudio.ui.components.SelectionPill
@@ -82,7 +83,7 @@ fun PracticePlayerScreen(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color(0xFF08161D),
-                            accent.copy(alpha = 0.28f),
+                            accent.copy(alpha = 0.18f),
                             Color(0xFF11242A),
                         ),
                     ),
@@ -91,7 +92,7 @@ fun PracticePlayerScreen(
                 .drawBehind {
                     drawCircle(
                         brush = Brush.radialGradient(
-                            colors = listOf(phaseTint.copy(alpha = 0.28f), Color.Transparent),
+                            colors = listOf(phaseTint.copy(alpha = 0.18f), Color.Transparent),
                             center = Offset(size.width / 2f, size.height * 0.32f),
                             radius = size.minDimension * 0.56f,
                         ),
@@ -113,14 +114,12 @@ fun PracticePlayerScreen(
                 PlayerHero(
                     sessionState = state,
                     stepColor = phaseTint,
-                    totalMinutes = config.durationMinutes.coerceAtLeast(1),
+                    totalDurationMillis = state.plan.totalDurationMillis,
                     modifier = Modifier.weight(1f),
                 )
                 PlayerStats(
                     sessionState = state,
-                    totalMinutes = config.durationMinutes.coerceAtLeast(1),
-                    soundEnabled = config.cues.soundEnabled,
-                    hapticsEnabled = config.cues.hapticsEnabled,
+                    totalDurationMillis = state.plan.totalDurationMillis,
                 )
                 PlayerControls(
                     sessionState = state,
@@ -154,7 +153,7 @@ private fun PlayerTopBar(
 private fun PlayerHero(
     sessionState: PlayerSessionState,
     stepColor: Color,
-    totalMinutes: Int,
+    totalDurationMillis: Long,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -182,7 +181,7 @@ private fun PlayerHero(
                     color = Color(0xD5F4EFE2),
                 )
                 Text(
-                    text = "${sessionState.plan.practice.safeSubtitle} • ${totalMinutes.coerceAtLeast(1)} min",
+                    text = "${sessionState.plan.practice.safeSubtitle} • ${formatDurationMinutesSeconds(totalDurationMillis)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xBEE0E9E7),
                 )
@@ -243,31 +242,14 @@ private fun PlayerHero(
 @Composable
 private fun PlayerStats(
     sessionState: PlayerSessionState,
-    totalMinutes: Int,
-    soundEnabled: Boolean,
-    hapticsEnabled: Boolean,
+    totalDurationMillis: Long,
 ) {
-    Row(
+    StatCard(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        StatCard(
-            modifier = Modifier.weight(1f),
-            title = "Remaining",
-            value = formatClock(sessionState.remainingSessionMillis),
-            caption = "of ${formatMinutes(totalMinutes)}",
-        )
-        StatCard(
-            modifier = Modifier.weight(1f),
-            title = "Sensory",
-            value = buildString {
-                append(if (soundEnabled) "Audio" else "Silent")
-                append(" & ")
-                append(if (hapticsEnabled) "Haptic" else "Still")
-            },
-            caption = sessionState.plan.practice.safeCategory,
-        )
-    }
+        title = "Remaining",
+        value = formatClock(sessionState.remainingSessionMillis),
+        caption = "of ${formatDurationMinutesSeconds(totalDurationMillis)}",
+    )
 }
 
 @Composable

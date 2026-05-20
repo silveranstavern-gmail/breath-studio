@@ -17,27 +17,117 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Spacer
+import com.ponderingsilver.breathstudio.ui.theme.contrastColor
+import com.ponderingsilver.breathstudio.ui.theme.ensureVisible
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.ponderingsilver.breathstudio.domain.model.defaultColorHexForLabel
 import com.ponderingsilver.breathstudio.domain.model.normalizeColorHexOrNull
 import com.ponderingsilver.breathstudio.domain.model.StepSound
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ColorPickerBottomSheet(
+    initialColor: Color,
+    onColorSelected: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState()
+    val controller = rememberColorPickerController()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = Color(0xFF1C1C1E),
+        contentColor = Color(0xFFF8F3E8),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp, start = 24.dp, end = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Pick a Step Color",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            HsvColorPicker(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp),
+                controller = controller,
+                initialColor = initialColor,
+                onColorChanged = { colorEnvelope ->
+                    if (colorEnvelope.fromUser) {
+                        onColorSelected(colorEnvelope.color.toHex())
+                    }
+                }
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel", color = Color(0xFFEBC58D))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF7ED9C8),
+                        contentColor = Color(0xFF133139)
+                    )
+                ) {
+                    Text("Select Color")
+                }
+            }
+        }
+    }
+}
+
+private fun Color.toHex(): String = "#%02X%02X%02X".format(
+    (this.red * 255).toInt(),
+    (this.green * 255).toInt(),
+    (this.blue * 255).toInt()
+)
 
 @Composable
 fun BuilderHeader(
@@ -226,6 +316,16 @@ fun StepEditorCard(
 ) {
     val normalizedColorHex = normalizeColorHexOrNull(step.colorHex) ?: defaultColorHexForLabel(step.label)
     val previewColor = colorFromHex(normalizedColorHex)
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        ColorPickerBottomSheet(
+            initialColor = previewColor,
+            onColorSelected = onColorHexChanged,
+            onDismiss = { showColorPicker = false }
+        )
+    }
+
     Card(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
@@ -324,11 +424,12 @@ fun StepEditorCard(
             ) {
                 DefaultStepPresets.forEach { preset ->
                     val presetHex = preset.colorHex
-                    val selected = normalizedColorHex == presetHex
+                    val isColorMatchingPreset = normalizedColorHex.equals(presetHex, ignoreCase = true)
+
                     BuilderChoiceChip(
                         title = preset.label,
-                        caption = if (selected) "Preset active" else presetHex,
-                        selected = selected,
+                        caption = if (isColorMatchingPreset) "Preset active" else presetHex,
+                        selected = isColorMatchingPreset,
                         onClick = { onColorHexChanged(presetHex) },
                     )
                 }
@@ -346,14 +447,24 @@ fun StepEditorCard(
                     label = { Text("Step Color HEX") },
                     placeholder = { Text("#7ED9C8") },
                     supportingText = { Text("Use #RRGGBB (e.g. #9BC1FF).") },
+                    trailingIcon = {
+                        IconButton(onClick = { showColorPicker = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Palette,
+                                contentDescription = "Pick color",
+                                tint = previewColor.ensureVisible(MaterialTheme.colorScheme.surface)
+                            )
+                        }
+                    }
                 )
                 Surface(
                     modifier = Modifier
                         .padding(top = 6.dp)
+                        .clickable { showColorPicker = true }
                         .clip(RoundedCornerShape(14.dp)),
                     shape = RoundedCornerShape(14.dp),
                     color = previewColor.copy(alpha = 0.24f),
-                    contentColor = Color(0xFFF4EEE3),
+                    contentColor = previewColor.contrastColor(),
                 ) {
                     Text(
                         text = normalizedColorHex,

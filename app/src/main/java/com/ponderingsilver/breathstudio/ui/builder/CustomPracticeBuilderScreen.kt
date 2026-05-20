@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ponderingsilver.breathstudio.domain.model.AuthoredPracticeDefinition
 import java.util.UUID
+import kotlin.math.ceil
 import kotlinx.coroutines.launch
 
 @Composable
@@ -309,9 +310,23 @@ fun CustomPracticeBuilderScreen(
                         singleLine = true,
                         keyboardOptions = KeyboardOptions.Default,
                         label = {
-                            Text(if (selectedBlock.targetMode == BuilderTargetMode.DurationMinutes) "Minutes" else "Rounds")
+                            Text(if (selectedBlock.targetMode == BuilderTargetMode.DurationMinutes) "Target Minutes" else "Rounds")
                         },
                     )
+                    if (selectedBlock.targetMode == BuilderTargetMode.DurationMinutes) {
+                        selectedBlock.cycleDurationMillisOrNull()?.let { cycleMillis ->
+                            val targetMinutes = selectedBlock.targetValueInput.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                            val targetMillis = targetMinutes * 60_000L
+                            val rounds = ceil(targetMillis / cycleMillis.toDouble()).toInt().coerceAtLeast(1)
+                            val actualMillis = rounds * cycleMillis
+                            Text(
+                                text = "Result: $rounds rounds (${formatDurationMinutesSeconds(actualMillis)})",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xBEE0E9E7),
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
+                    }
                 }
             }
             BuilderSection(

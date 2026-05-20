@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.ponderingsilver.breathstudio.data.practice.PracticeLibraryEntry
 import com.ponderingsilver.breathstudio.domain.model.BreathPractice
 import com.ponderingsilver.breathstudio.ui.components.SelectionPill
+import com.ponderingsilver.breathstudio.ui.builder.formatDurationMinutesSeconds
 
 @Composable
 fun PracticeHomeScreen(
@@ -254,8 +255,13 @@ fun PracticeHomeScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
+                val displayDuration = if (selectedPractice.stages.any { it.rounds > 1 } || selectedPractice.stages.size > 1) {
+                    formatDurationMinutesSeconds(selectedPractice.cycleDurationSeconds * 1000L)
+                } else {
+                    "${selectedPractice.safeDefaultDurationMinutes} min"
+                }
                 Text(
-                    text = "${selectedPractice.safeDefaultDurationMinutes} min • ${selectedPractice.safeCategory} • ${selectedPractice.cadenceLabel}",
+                    text = "$displayDuration • ${selectedPractice.safeCategory} • ${selectedPractice.cadenceLabel}",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     color = Color(0xCCE7EFEA),

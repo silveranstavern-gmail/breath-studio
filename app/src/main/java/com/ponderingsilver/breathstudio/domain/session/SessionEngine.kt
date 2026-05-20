@@ -122,14 +122,10 @@ private fun buildTimedSteps(
 
     while (elapsed < totalDurationMillis) {
         templateSteps.forEach { template ->
-            if (elapsed >= totalDurationMillis) return@forEach
-            val remaining = totalDurationMillis - elapsed
-            val duration = minOf(template.durationMillis, remaining)
             executableSteps += template.copy(
-                durationMillis = duration,
                 sessionCycleIndex = sessionCycleIndex,
             )
-            elapsed += duration
+            elapsed += template.durationMillis
         }
         sessionCycleIndex += 1
     }

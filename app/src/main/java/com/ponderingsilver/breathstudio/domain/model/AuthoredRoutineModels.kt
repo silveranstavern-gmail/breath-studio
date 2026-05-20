@@ -1,7 +1,10 @@
 package com.ponderingsilver.breathstudio.domain.model
 
 sealed interface AuthoredBlockTarget {
-    data class Repetitions(val count: Int) : AuthoredBlockTarget
+    data class Repetitions(
+        val count: Int,
+        val fromTargetDurationMillis: Long? = null,
+    ) : AuthoredBlockTarget
     data class DurationMillis(val durationMillis: Long) : AuthoredBlockTarget
 }
 

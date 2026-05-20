@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SupportScreen(
     onBack: () -> Unit,
+    onOpenDiagnostics: () -> Unit,
 ) {
     val context = LocalContext.current
     val billing = remember { SupportBilling(context) }
@@ -51,11 +53,19 @@ fun SupportScreen(
     val scrollState = rememberScrollState()
 
     LaunchedEffect(billing) {
+        SupportDiagnostics.log(
+            title = "Support screen",
+            detail = "Support screen opened.",
+        )
         billing.connect()
     }
 
     DisposableEffect(billing) {
         onDispose {
+            SupportDiagnostics.log(
+                title = "Support screen",
+                detail = "Support screen disposed.",
+            )
             billing.release()
         }
     }
@@ -81,7 +91,10 @@ fun SupportScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            SupportTopBar(onBack = onBack)
+            SupportTopBar(
+                onBack = onBack,
+                onOpenDiagnostics = onOpenDiagnostics,
+            )
             SupportHeader()
             SupportOptionsCard(
                 products = billingState.products,
@@ -98,6 +111,10 @@ fun SupportScreen(
             }
             CreatorSiteCard(
                 onOpenWebsite = {
+                    SupportDiagnostics.log(
+                        title = "Website link",
+                        detail = "Opening $PonderingSilverHomeUrl",
+                    )
                     context.startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
@@ -114,6 +131,7 @@ fun SupportScreen(
 @Composable
 private fun SupportTopBar(
     onBack: () -> Unit,
+    onOpenDiagnostics: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -125,6 +143,7 @@ private fun SupportTopBar(
         }
         Text(
             text = "Support",
+            modifier = Modifier.clickable(onClick = onOpenDiagnostics),
             color = Color(0xFFEFDDB4),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,

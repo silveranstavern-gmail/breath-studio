@@ -41,10 +41,28 @@ class SupportBilling(
     private val billingClient = runCatching {
         BillingClient.newBuilder(appContext)
             .setListener { billingResult, purchases ->
+                SupportDiagnostics.log(
+                    title = "Billing callback",
+                    detail = "response=${billingResult.responseCode} purchases=${purchases.orEmpty().size}",
+                )
                 handlePurchases(billingResult, purchases.orEmpty())
             }
-            .enablePendingPurchases(PendingPurchasesParams.newBuilder().build())
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder()
+                    .enableOneTimeProducts()
+                    .build(),
+            )
             .build()
+    }.onSuccess {
+        SupportDiagnostics.log(
+            title = "Billing client",
+            detail = "BillingClient created successfully.",
+        )
+    }.onFailure { error ->
+        SupportDiagnostics.log(
+            title = "Billing client failure",
+            detail = "${error::class.java.simpleName}: ${error.message.orEmpty()}",
+        )
     }.getOrNull()
     private val _state = MutableStateFlow(
         SupportBillingState(
@@ -60,6 +78,10 @@ class SupportBilling(
     fun connect() {
         val client = billingClient
         if (client == null) {
+            SupportDiagnostics.log(
+                title = "Connect skipped",
+                detail = "BillingClient is null.",
+            )
             _state.value = _state.value.copy(
                 connected = false,
                 message = "Google Play support options are unavailable in this build.",
@@ -67,14 +89,26 @@ class SupportBilling(
             return
         }
         if (client.isReady) {
+            SupportDiagnostics.log(
+                title = "Connect reused",
+                detail = "BillingClient already ready.",
+            )
             queryProducts()
             return
         }
 
+        SupportDiagnostics.log(
+            title = "Connect start",
+            detail = "Starting Play Billing connection.",
+        )
         runCatching {
             client.startConnection(
                 object : BillingClientStateListener {
                     override fun onBillingSetupFinished(billingResult: BillingResult) {
+                        SupportDiagnostics.log(
+                            title = "Connect finished",
+                            detail = "response=${billingResult.responseCode} message=${billingResult.debugMessage}",
+                        )
                         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                             _state.value = _state.value.copy(connected = true, message = null)
                             queryProducts()
@@ -87,11 +121,19 @@ class SupportBilling(
                     }
 
                     override fun onBillingServiceDisconnected() {
+                        SupportDiagnostics.log(
+                            title = "Billing disconnected",
+                            detail = "Billing service disconnected.",
+                        )
                         _state.value = _state.value.copy(connected = false)
                     }
                 },
             )
         }.onFailure {
+            SupportDiagnostics.log(
+                title = "Connect failure",
+                detail = "${it::class.java.simpleName}: ${it.message.orEmpty()}",
+            )
             _state.value = _state.value.copy(
                 connected = false,
                 message = "Google Play support options are unavailable right now.",
@@ -104,6 +146,15 @@ class SupportBilling(
         val activity = context.findActivity()
         val details = product.productDetails
         if (client == null || activity == null || details == null || !client.isReady) {
+            SupportDiagnostics.log(
+                title = "Launch blocked",
+                detail = buildString {
+                    append("product=${product.id}")
+                    append(" clientReady=${client?.isReady == true}")
+                    append(" activity=${activity != null}")
+                    append(" details=${details != null}")
+                },
+            )
             _state.value = _state.value.copy(
                 message = "Google Play support options are still loading.",
             )
@@ -117,11 +168,19 @@ class SupportBilling(
             }
             .build()
 
+        SupportDiagnostics.log(
+            title = "Launch purchase",
+            detail = "product=${product.id} price=${product.displayPrice}",
+        )
         val result = client.launchBillingFlow(
             activity,
             BillingFlowParams.newBuilder()
                 .setProductDetailsParamsList(listOf(productDetailsParams))
                 .build(),
+        )
+        SupportDiagnostics.log(
+            title = "Launch result",
+            detail = "response=${result.responseCode} message=${result.debugMessage}",
         )
         if (result.responseCode != BillingClient.BillingResponseCode.OK) {
             _state.value = _state.value.copy(message = "Google Play could not start checkout.")
@@ -131,6 +190,10 @@ class SupportBilling(
     fun release() {
         val client = billingClient ?: return
         if (client.isReady) {
+            SupportDiagnostics.log(
+                title = "Billing release",
+                detail = "Ending BillingClient connection.",
+            )
             client.endConnection()
         }
     }
@@ -142,8 +205,9 @@ class SupportBilling(
 
     private fun queryProductsByType(productType: String) {
         val client = billingClient ?: return
-        val products = SupportProducts
+        val sourceProducts = SupportProducts
             .filter { product -> product.productType == productType }
+        val products = sourceProducts
             .map { product ->
                 QueryProductDetailsParams.Product.newBuilder()
                     .setProductId(product.id)
@@ -153,17 +217,31 @@ class SupportBilling(
 
         if (products.isEmpty()) return
 
+        SupportDiagnostics.log(
+            title = "Query start",
+            detail = "type=$productType ids=${sourceProducts.joinToString { it.id }}",
+        )
         runCatching {
             client.queryProductDetailsAsync(
-            QueryProductDetailsParams.newBuilder()
-                .setProductList(products)
-                .build(),
+                QueryProductDetailsParams.newBuilder()
+                    .setProductList(products)
+                    .build(),
             ) { billingResult, productDetailsResult ->
+                SupportDiagnostics.log(
+                    title = "Query result",
+                    detail = "type=$productType response=${billingResult.responseCode} returned=${productDetailsResult.productDetailsList.size}",
+                )
                 if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
                     return@queryProductDetailsAsync
                 }
                 val detailsById = productDetailsResult.productDetailsList.associateBy { details ->
                     details.productId
+                }
+                detailsById.values.forEach { details ->
+                    SupportDiagnostics.log(
+                        title = "Product detail",
+                        detail = "id=${details.productId} price=${details.displayPrice().orEmpty()}",
+                    )
                 }
                 _state.value = _state.value.copy(
                     products = _state.value.products.map { product ->
@@ -176,6 +254,10 @@ class SupportBilling(
                 )
             }
         }.onFailure {
+            SupportDiagnostics.log(
+                title = "Query failure",
+                detail = "type=$productType ${it::class.java.simpleName}: ${it.message.orEmpty()}",
+            )
             _state.value = _state.value.copy(
                 connected = false,
                 message = "Google Play support options are unavailable right now.",
@@ -190,12 +272,22 @@ class SupportBilling(
         when (billingResult.responseCode) {
             BillingClient.BillingResponseCode.OK -> purchases.forEach(::finalizePurchase)
             BillingClient.BillingResponseCode.USER_CANCELED -> Unit
-            else -> _state.value = _state.value.copy(message = "Google Play purchase was not completed.")
+            else -> {
+                SupportDiagnostics.log(
+                    title = "Purchase callback failure",
+                    detail = "response=${billingResult.responseCode} message=${billingResult.debugMessage}",
+                )
+                _state.value = _state.value.copy(message = "Google Play purchase was not completed.")
+            }
         }
     }
 
     private fun finalizePurchase(purchase: Purchase) {
         if (purchase.purchaseState != Purchase.PurchaseState.PURCHASED) return
+        SupportDiagnostics.log(
+            title = "Purchase received",
+            detail = "products=${purchase.products.joinToString()} acknowledged=${purchase.isAcknowledged}",
+        )
 
         if (MonthlySupportProductId in purchase.products) {
             if (!purchase.isAcknowledged) {
@@ -204,6 +296,10 @@ class SupportBilling(
                         .setPurchaseToken(purchase.purchaseToken)
                         .build(),
                 ) { billingResult ->
+                    SupportDiagnostics.log(
+                        title = "Subscription acknowledge",
+                        detail = "response=${billingResult.responseCode} message=${billingResult.debugMessage}",
+                    )
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                         _state.value = _state.value.copy(message = "Thank you for supporting Breath Studio.")
                     }
@@ -217,6 +313,10 @@ class SupportBilling(
                 .setPurchaseToken(purchase.purchaseToken)
                 .build(),
         ) { billingResult, _ ->
+            SupportDiagnostics.log(
+                title = "Consume result",
+                detail = "response=${billingResult.responseCode} message=${billingResult.debugMessage}",
+            )
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 _state.value = _state.value.copy(message = "Thank you for supporting Breath Studio.")
             }

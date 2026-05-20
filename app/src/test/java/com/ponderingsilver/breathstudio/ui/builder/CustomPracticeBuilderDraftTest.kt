@@ -54,7 +54,7 @@ class CustomPracticeBuilderDraftTest {
         assertEquals(2, definition.blocks.size)
         val firstBlock = definition.blocks[0] as AuthoredPracticeBlock.RepeatingCycle
         val secondBlock = definition.blocks[1] as AuthoredPracticeBlock.RepeatingCycle
-        assertEquals(AuthoredBlockTarget.DurationMillis(600_000L), firstBlock.target)
+        assertEquals(AuthoredBlockTarget.Repetitions(60, 600_000L), firstBlock.target)
         assertEquals(AuthoredBlockTarget.Repetitions(6), secondBlock.target)
         assertEquals(listOf(5_000L, 5_000L), firstBlock.cycle.steps.map { it.safeDurationMillis })
         assertEquals(listOf(6_000L, 6_000L, 6_000L, 6_000L), secondBlock.cycle.steps.map { it.safeDurationMillis })
@@ -104,6 +104,7 @@ class CustomPracticeBuilderDraftTest {
         assertEquals("8", draft.blocks[0].targetValueInput)
         assertEquals("5", draft.blocks[1].targetValueInput)
         assertEquals(listOf("4", "6"), draft.blocks[0].steps.map { it.durationInput })
+        assertEquals(BuilderTargetMode.DurationMinutes, draft.blocks[1].targetMode)
 
         val saved = draft.copy(title = "Refined Box").toAuthoredPracticeDefinitionOrNull { "new-id" }
 

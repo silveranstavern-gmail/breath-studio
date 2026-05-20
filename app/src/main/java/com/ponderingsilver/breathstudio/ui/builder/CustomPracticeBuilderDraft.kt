@@ -102,13 +102,21 @@ fun AuthoredPracticeDefinition.toBuilderDraftOrNull(): CustomPracticeBuilderDraf
         EditablePracticeBlock(
             id = "${safeId}-block-$index",
             title = repeatingBlock.safeTitle,
-            targetMode = when (repeatingBlock.target) {
+            targetMode = when (val target = repeatingBlock.target) {
                 is AuthoredBlockTarget.DurationMillis -> BuilderTargetMode.DurationMinutes
-                is AuthoredBlockTarget.Repetitions -> BuilderTargetMode.Repetitions
+                is AuthoredBlockTarget.Repetitions -> if (target.fromTargetDurationMillis != null) {
+                    BuilderTargetMode.DurationMinutes
+                } else {
+                    BuilderTargetMode.Repetitions
+                }
             },
             targetValueInput = when (val target = repeatingBlock.target) {
                 is AuthoredBlockTarget.DurationMillis -> ceil(target.durationMillis / 60_000.0).toInt().toString()
-                is AuthoredBlockTarget.Repetitions -> target.count.toString()
+                is AuthoredBlockTarget.Repetitions -> if (target.fromTargetDurationMillis != null) {
+                    ceil(target.fromTargetDurationMillis / 60_000.0).toInt().toString()
+                } else {
+                    target.count.toString()
+                }
             },
             steps = repeatingBlock.cycle.steps.mapIndexed { stepIndex, step ->
                 EditablePracticeStep(
@@ -219,7 +227,13 @@ private fun EditablePracticeBlock.toAuthoredBlockOrNull(): AuthoredPracticeBlock
     val blockTarget = when (targetMode) {
         BuilderTargetMode.DurationMinutes -> {
             val durationMinutes = targetValueInput.trim().toIntOrNull()?.coerceAtLeast(1) ?: return null
-            AuthoredBlockTarget.DurationMillis(durationMinutes * 60_000L)
+            val targetDurationMillis = durationMinutes * 60_000L
+            val cycleDurationMillis = authoredSteps.sumOf { it.safeDurationMillis }
+            val rounds = ceil(targetDurationMillis / cycleDurationMillis.toDouble()).toInt().coerceAtLeast(1)
+            AuthoredBlockTarget.Repetitions(
+                count = rounds,
+                fromTargetDurationMillis = targetDurationMillis,
+            )
         }
         BuilderTargetMode.Repetitions -> {
             val repetitions = targetValueInput.trim().toIntOrNull()?.coerceAtLeast(1) ?: return null
