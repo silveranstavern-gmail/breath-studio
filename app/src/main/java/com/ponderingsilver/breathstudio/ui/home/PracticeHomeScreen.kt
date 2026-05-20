@@ -1,6 +1,7 @@
 package com.ponderingsilver.breathstudio.ui.home
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -255,14 +256,9 @@ fun PracticeHomeScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                val displayDuration = if (selectedPractice.stages.any { it.rounds > 1 } || selectedPractice.stages.size > 1) {
-                    formatDurationMinutesSeconds(selectedPractice.cycleDurationSeconds * 1000L)
-                } else {
-                    "${selectedPractice.safeDefaultDurationMinutes} min"
-                }
+                val displayDuration = formatDurationMinutesSeconds(selectedPractice.cycleDurationSeconds * 1000L)
                 Text(
-                    text = "$displayDuration • ${selectedPractice.safeCategory} • ${selectedPractice.cadenceLabel}",
-                    modifier = Modifier.fillMaxWidth(),
+                    text = "$displayDuration • ${selectedPractice.safeCategory} • ${selectedPractice.cadenceLabel}",                    modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     color = Color(0xCCE7EFEA),
                     style = MaterialTheme.typography.bodyMedium,
@@ -360,14 +356,15 @@ private fun HomeHero(
                 lineHeight = 24.sp,
             )
             Surface(
-                color = Color(0x14FFFFFF),
-                contentColor = Color(0xFFF4DEB5),
-                shape = RoundedCornerShape(24.dp),
+                color = Color(0x0AFFFFFF),
+                contentColor = Color(0xFFF4DEB5).copy(alpha = 0.85f),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color(0x12FFFFFF))
             ) {
                 Text(
                     text = selectedPractice?.let { "Next Practice: ${it.safeTitle}" } ?: "Build a library you can actually reuse",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    style = MaterialTheme.typography.labelMedium,
                 )
             }
         }

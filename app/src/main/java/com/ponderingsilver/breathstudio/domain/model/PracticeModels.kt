@@ -78,7 +78,6 @@ data class BreathPractice(
     val category: String,
     val stages: List<PracticeStage>,
     val preferredVisualMode: BreathingVisualMode,
-    val defaultDurationMinutes: Int = 5,
 ) {
     init {
         require(stages.isNotEmpty()) { "A practice must contain at least one stage." }
@@ -89,7 +88,6 @@ data class BreathPractice(
     val safeSubtitle: String = subtitle.trim().ifBlank { "Guided breathing" }
     val safeDescription: String = description.trim().ifBlank { "Follow each cue at a comfortable pace." }
     val safeCategory: String = category.trim().ifBlank { "Practice" }
-    val safeDefaultDurationMinutes: Int = defaultDurationMinutes.coerceAtLeast(1)
 
     val cycleDurationSeconds: Int = stages.sumOf { stage ->
         stage.cycle.durationSeconds * stage.rounds

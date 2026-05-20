@@ -54,7 +54,6 @@ data class AuthoredPracticeDefinition(
     val category: String,
     val blocks: List<AuthoredPracticeBlock>,
     val preferredVisualMode: BreathingVisualMode,
-    val defaultDurationMinutes: Int = 5,
 ) {
     init {
         require(blocks.isNotEmpty()) { "An authored practice definition must contain at least one block." }
@@ -65,7 +64,6 @@ data class AuthoredPracticeDefinition(
     val safeSubtitle: String = subtitle.trim().ifBlank { "Guided breathing" }
     val safeDescription: String = description.trim().ifBlank { "Follow each cue at a comfortable pace." }
     val safeCategory: String = category.trim().ifBlank { "Practice" }
-    val safeDefaultDurationMinutes: Int = defaultDurationMinutes.coerceAtLeast(1)
 }
 
 fun AuthoredPracticeDefinition.toDomainPracticeOrNull(): BreathPractice? = runCatching {
@@ -91,7 +89,6 @@ fun AuthoredPracticeDefinition.toDomainPracticeOrNull(): BreathPractice? = runCa
             )
         },
         preferredVisualMode = preferredVisualMode,
-        defaultDurationMinutes = safeDefaultDurationMinutes,
     )
 }.getOrNull()
 
@@ -123,7 +120,6 @@ fun BreathPractice.toAuthoredPracticeDefinition(): AuthoredPracticeDefinition = 
         )
     },
     preferredVisualMode = preferredVisualMode,
-    defaultDurationMinutes = safeDefaultDurationMinutes,
 )
 
 private fun AuthoredPracticeBlock.toPracticeStageOrNull(): PracticeStage? {

@@ -50,7 +50,6 @@ class CustomPracticeBuilderDraftTest {
         requireNotNull(definition)
         assertEquals("custom-evening-ladder", definition.safeId)
         assertEquals(BreathingVisualMode.Glow, definition.preferredVisualMode)
-        assertEquals(13, definition.safeDefaultDurationMinutes)
         assertEquals(2, definition.blocks.size)
         val firstBlock = definition.blocks[0] as AuthoredPracticeBlock.RepeatingCycle
         val secondBlock = definition.blocks[1] as AuthoredPracticeBlock.RepeatingCycle
@@ -91,7 +90,6 @@ class CustomPracticeBuilderDraftTest {
                 ),
             ),
             preferredVisualMode = BreathingVisualMode.Glow,
-            defaultDurationMinutes = 5,
         )
 
         val draft = existing.toBuilderDraftOrNull()

@@ -1,5 +1,6 @@
 package com.ponderingsilver.breathstudio.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -20,17 +21,17 @@ fun SelectionPill(
 ) {
     Surface(
         modifier = modifier,
-        color = Color(0x18FFFFFF),
-        contentColor = Color(0xFFEFDDB4),
-        shape = RoundedCornerShape(999.dp),
+        color = Color(0x0AFFFFFF),
+        contentColor = Color(0xFFEFDDB4).copy(alpha = 0.85f),
+        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(1.dp, Color(0x1AFFFFFF))
     ) {
         Text(
             text = text,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(horizontal = 10.dp, vertical = 4.dp)
                 ,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

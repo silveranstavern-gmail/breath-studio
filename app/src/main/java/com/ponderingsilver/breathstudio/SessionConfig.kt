@@ -45,15 +45,11 @@ data class SessionConfig(
         ): SessionConfig {
             val def = authoredDefinition ?: practice.toAuthoredPracticeDefinition()
             
-            // If the definition has multiple blocks or blocks with specific repetition counts,
-            // we should probably follow its structure rather than forcing a timed loop.
-            // But for simple single-block practices, we usually want to loop for the default duration.
-            val runTarget = if (authoredDefinition != null || practice.stages.any { it.rounds > 1 } || practice.stages.size > 1) {
-                // For authored or multi-stage/multi-round practices, use the structural duration
-                SessionRunTarget.PracticeCycles(1)
-            } else {
-                SessionRunTarget.Timed(practice.safeDefaultDurationMinutes)
-            }
+            // Prioritize the structural intent of the practice (cycles and rounds).
+            // This ensures that presets with specific round counts (like 108) or 
+            // multi-stage routines always run their intended path rather than 
+            // falling back to a generic timed loop.
+            val runTarget = SessionRunTarget.PracticeCycles(1)
 
             return SessionConfig(
                 practice = practice,

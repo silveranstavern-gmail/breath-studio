@@ -156,7 +156,6 @@ fun CustomPracticeBuilderDraft.toAuthoredPracticeDefinitionOrNull(
         category = category.trim().ifBlank { DefaultPracticeCategories.first() },
         blocks = authoredBlocks,
         preferredVisualMode = visualMode,
-        defaultDurationMinutes = suggestedDefaultDurationMinutes(authoredBlocks),
     )
 }
 
@@ -270,16 +269,6 @@ private fun draftDescription(blocks: List<AuthoredPracticeBlock.RepeatingCycle>)
     }.replaceFirstChar { char ->
         if (char.isLowerCase()) char.titlecase(Locale.US) else char.toString()
     }
-}
-
-private fun suggestedDefaultDurationMinutes(blocks: List<AuthoredPracticeBlock.RepeatingCycle>): Int {
-    val totalDurationMillis = blocks.sumOf { block ->
-        when (val target = block.target) {
-            is AuthoredBlockTarget.DurationMillis -> target.durationMillis
-            is AuthoredBlockTarget.Repetitions -> block.cycle.durationMillis * target.count.coerceAtLeast(1)
-        }
-    }
-    return ceil(totalDurationMillis / 60_000.0).toInt().coerceAtLeast(1)
 }
 
 fun newEditableBlockFromTemplate(block: EditablePracticeBlock? = null): EditablePracticeBlock {

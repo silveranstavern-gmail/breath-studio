@@ -14,28 +14,6 @@ import com.ponderingsilver.breathstudio.domain.model.toAuthoredPracticeDefinitio
 
 fun buildExecutableSessionPlan(
     practice: BreathPractice,
-    durationMinutes: Int,
-    visualMode: BreathingVisualMode = practice.preferredVisualMode,
-): ExecutableSessionPlan = buildExecutableSessionPlan(
-    practice = practice,
-    runTarget = SessionRunTarget.Timed(durationMinutes),
-    visualMode = visualMode,
-)
-
-fun buildExecutableSessionPlan(
-    practice: BreathPractice,
-    authoredDefinition: AuthoredPracticeDefinition,
-    durationMinutes: Int,
-    visualMode: BreathingVisualMode = practice.preferredVisualMode,
-): ExecutableSessionPlan = buildExecutableSessionPlan(
-    practice = practice,
-    authoredDefinition = authoredDefinition,
-    runTarget = SessionRunTarget.Timed(durationMinutes),
-    visualMode = visualMode,
-)
-
-fun buildExecutableSessionPlan(
-    practice: BreathPractice,
     runTarget: SessionRunTarget,
     visualMode: BreathingVisualMode = practice.preferredVisualMode,
 ): ExecutableSessionPlan {

@@ -27,7 +27,6 @@ data class AuthoredPracticeDto(
     val blocks: List<AuthoredPracticeBlockDto> = emptyList(),
     val stages: List<AuthoredPracticeStageDto> = emptyList(),
     val preferredVisualModeName: String? = null,
-    val defaultDurationMinutes: Int = DefaultDurationMinutes,
 ) {
     companion object {
         const val DefaultDurationMinutes: Int = 5
@@ -131,7 +130,6 @@ fun AuthoredPracticeDto.toAuthoredDefinitionOrNull(): AuthoredPracticeDefinition
             category = category.safeText("Saved", MaximumCategoryLength),
             blocks = domainBlocks,
             preferredVisualMode = parseVisualMode(preferredVisualModeName),
-            defaultDurationMinutes = defaultDurationMinutes.coerceIn(MinimumDurationMinutes, MaximumDurationMinutes),
         )
     }.getOrNull()
 }
@@ -163,7 +161,6 @@ fun BreathPractice.toAuthoredDto(): AuthoredPracticeDto = AuthoredPracticeDto(
         )
     },
     preferredVisualModeName = preferredVisualMode.name,
-    defaultDurationMinutes = safeDefaultDurationMinutes,
 )
 
 fun AuthoredPracticeDefinition.toAuthoredDto(): AuthoredPracticeDto = AuthoredPracticeDto(
@@ -191,7 +188,6 @@ fun AuthoredPracticeDefinition.toAuthoredDto(): AuthoredPracticeDto = AuthoredPr
         }
     },
     preferredVisualModeName = preferredVisualMode.name,
-    defaultDurationMinutes = safeDefaultDurationMinutes,
 )
 
 private fun AuthoredPracticeStageDto.toDomainOrNull(): PracticeStage? {

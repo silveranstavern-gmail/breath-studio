@@ -11,7 +11,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Stage cycle",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(108),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
@@ -34,7 +34,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Stage cycle",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(20),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
@@ -56,7 +56,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Stage cycle",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(30),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
@@ -78,7 +78,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Settle",
-                target = PracticeStageTarget.Rounds(3),
+                target = PracticeStageTarget.Rounds(10),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
@@ -88,7 +88,7 @@ object BuiltInPractices {
             ),
             PracticeStage(
                 title = "Lengthen",
-                target = PracticeStageTarget.Rounds(3),
+                target = PracticeStageTarget.Rounds(10),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
@@ -98,7 +98,7 @@ object BuiltInPractices {
             ),
             PracticeStage(
                 title = "Soften",
-                target = PracticeStageTarget.Rounds(3),
+                target = PracticeStageTarget.Rounds(10),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 4, label = "Inhale", sound = StepSound.Inhale),
@@ -107,7 +107,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 6,
     )
 
     val NadiShodhanaL3 = BreathPractice(
@@ -120,7 +119,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Full round",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(15),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
@@ -135,7 +134,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 20,
     )
 
     val NadiShodhanaL4 = BreathPractice(
@@ -148,7 +146,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Full round",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(12),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
@@ -163,7 +161,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 20,
     )
 
     val NadiShodhanaL5 = BreathPractice(
@@ -176,7 +173,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Full round",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(6),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
@@ -191,7 +188,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 20,
     )
 
     val LeftNostrilMoon = BreathPractice(
@@ -204,7 +200,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Cooling cycle",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(30),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 5, label = "Left Nostril Inhale", colorHex = "#6FCF97", sound = StepSound.Inhale),
@@ -215,7 +211,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 12,
     )
 
     val RightNostrilSun = BreathPractice(
@@ -228,7 +223,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Activating cycle",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(30),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 5, label = "Right Nostril Inhale", colorHex = "#6BA8FF", sound = StepSound.Inhale),
@@ -239,7 +234,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 12,
     )
 
     val Bhramari = BreathPractice(
@@ -252,7 +246,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Humming cycle",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(35),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 4, label = "Nasal Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
@@ -262,7 +256,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 10,
     )
 
     val Ujjayi = BreathPractice(
@@ -275,7 +268,7 @@ object BuiltInPractices {
         stages = listOf(
             PracticeStage(
                 title = "Ocean cycle",
-                target = PracticeStageTarget.Rounds(1),
+                target = PracticeStageTarget.Rounds(108),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 6, label = "Ocean Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
@@ -284,7 +277,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 12,
     )
 
     val PowerBreathRetention = BreathPractice(
@@ -295,9 +287,10 @@ object BuiltInPractices {
         category = "Energizing",
         preferredVisualMode = BreathingVisualMode.Glow,
         stages = listOf(
+            // Round 1
             PracticeStage(
-                title = "Build",
-                target = PracticeStageTarget.Rounds(15),
+                title = "Build 1",
+                target = PracticeStageTarget.Rounds(30),
                 cycle = PracticeCycle(
                     steps = listOf(
                         PracticeStep(durationSeconds = 2, label = "Power Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
@@ -306,7 +299,7 @@ object BuiltInPractices {
                 ),
             ),
             PracticeStage(
-                title = "Hold Out",
+                title = "Hold Out 1",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
@@ -316,7 +309,71 @@ object BuiltInPractices {
                 ),
             ),
             PracticeStage(
-                title = "Recovery",
+                title = "Recovery 1",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Recovery Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 15, label = "Hold In", colorHex = "#E7C98C", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 6, label = "Ease Out", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                    ),
+                ),
+            ),
+            // Round 2
+            PracticeStage(
+                title = "Build 2",
+                target = PracticeStageTarget.Rounds(30),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 2, label = "Power Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 2, label = "Power Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                    ),
+                ),
+            ),
+            PracticeStage(
+                title = "Hold Out 2",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Release Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 30, label = "Hold Out", colorHex = "#C7D7D4", sound = StepSound.Hold),
+                    ),
+                ),
+            ),
+            PracticeStage(
+                title = "Recovery 2",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Recovery Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 15, label = "Hold In", colorHex = "#E7C98C", sound = StepSound.Hold),
+                        PracticeStep(durationSeconds = 6, label = "Ease Out", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                    ),
+                ),
+            ),
+            // Round 3
+            PracticeStage(
+                title = "Build 3",
+                target = PracticeStageTarget.Rounds(30),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 2, label = "Power Inhale", colorHex = "#7ED9C8", sound = StepSound.Inhale),
+                        PracticeStep(durationSeconds = 2, label = "Power Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                    ),
+                ),
+            ),
+            PracticeStage(
+                title = "Hold Out 3",
+                target = PracticeStageTarget.Rounds(1),
+                cycle = PracticeCycle(
+                    steps = listOf(
+                        PracticeStep(durationSeconds = 4, label = "Release Exhale", colorHex = "#9BC1FF", sound = StepSound.Exhale),
+                        PracticeStep(durationSeconds = 30, label = "Hold Out", colorHex = "#C7D7D4", sound = StepSound.Hold),
+                    ),
+                ),
+            ),
+            PracticeStage(
+                title = "Recovery 3",
                 target = PracticeStageTarget.Rounds(1),
                 cycle = PracticeCycle(
                     steps = listOf(
@@ -327,7 +384,6 @@ object BuiltInPractices {
                 ),
             ),
         ),
-        defaultDurationMinutes = 15,
     )
 
     val Sounds = BreathPractice(
@@ -356,7 +412,8 @@ object BuiltInPractices {
     )
 
     val all: List<BreathPractice> = listOf(
-        Sounds,
+        BoxBreathing,
+        ExhaleLadder,
         FourSevenEight,
         ExtendedExhale,
         NadiShodhanaL3,
@@ -367,5 +424,6 @@ object BuiltInPractices {
         Bhramari,
         Ujjayi,
         PowerBreathRetention,
+        Sounds,
     )
 }

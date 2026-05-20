@@ -43,7 +43,6 @@ class AuthoredPracticeDtosTest {
         val longTitle = "A".repeat(200)
         val practice = validDto(
             title = longTitle,
-            defaultDurationMinutes = -20,
             preferredVisualModeName = "NotAVisual",
             blocks = listOf(
                 AuthoredPracticeBlockDto(
@@ -65,7 +64,6 @@ class AuthoredPracticeDtosTest {
         assertNotNull(practice)
         requireNotNull(practice)
         assertEquals(80, practice.safeTitle.length)
-        assertEquals(1, practice.safeDefaultDurationMinutes)
         assertEquals(PracticeStageTarget.Rounds(1), practice.stages.first().target)
         assertEquals("Practice block", practice.stages.first().safeTitle)
         assertEquals(1, practice.stages.first().cycle.steps.first().safeDurationSeconds)
@@ -174,7 +172,6 @@ class AuthoredPracticeDtosTest {
     private fun validDto(
         id: String = "custom",
         title: String = "Custom Practice",
-        defaultDurationMinutes: Int = 5,
         preferredVisualModeName: String? = null,
         blocks: List<AuthoredPracticeBlockDto> = listOf(
             AuthoredPracticeBlockDto(
@@ -195,6 +192,5 @@ class AuthoredPracticeDtosTest {
         title = title,
         blocks = blocks,
         preferredVisualModeName = preferredVisualModeName,
-        defaultDurationMinutes = defaultDurationMinutes,
     )
 }

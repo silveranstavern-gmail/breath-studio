@@ -1,6 +1,7 @@
 package com.ponderingsilver.breathstudio.ui.builder
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -136,14 +137,15 @@ fun BuilderHeader(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Surface(
-            color = Color(0x18FFFFFF),
-            contentColor = Color(0xFFF6EEDB),
-            shape = RoundedCornerShape(999.dp),
+            color = Color(0x0AFFFFFF),
+            contentColor = Color(0xFFF6EEDB).copy(alpha = 0.85f),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, Color(0x1AFFFFFF))
         ) {
             Text(
                 text = "Custom Builder",
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.labelMedium,
             )
         }
         Text(
@@ -163,14 +165,15 @@ fun BuilderHeader(
             lineHeight = 24.sp,
         )
         Surface(
-            color = Color(0x14FFFFFF),
-            contentColor = Color(0xFFF4DEB5),
-            shape = RoundedCornerShape(24.dp),
+            color = Color(0x0AFFFFFF),
+            contentColor = Color(0xFFF4DEB5).copy(alpha = 0.85f),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, Color(0x12FFFFFF))
         ) {
             Text(
                 text = "$blockCount block${if (blockCount == 1) "" else "s"} in this routine",
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                style = MaterialTheme.typography.labelMedium,
             )
         }
     }
