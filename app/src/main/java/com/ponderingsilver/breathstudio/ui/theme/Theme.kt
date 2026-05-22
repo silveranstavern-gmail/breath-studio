@@ -41,7 +41,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun BreathStudioTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     MaterialTheme(
