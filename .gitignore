@@ -1,4 +1,7 @@
 *.iml
+/.*
+!/.gitignore
+!/.gitattributes
 .idea/
 .gradle
 /local.properties
