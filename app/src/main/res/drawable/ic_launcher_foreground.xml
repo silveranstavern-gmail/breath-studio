@@ -1,38 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- 1. Thin Translucent Inner Ring -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M26,43c9,-10 19,-15 30,-15c10,0 19,4 26,12"
-        android:strokeColor="#ECD7AB"
+        android:pathData="M 54,28 A 26,26 0 1,1 53.9,28 Z"
+        android:strokeColor="#00FFE0"
+        android:strokeWidth="1.2"
+        android:strokeAlpha="0.25"
+        android:fillColor="#00000000" />
+
+    <!-- 2. Main Gradient Ring -->
+    <path
+        android:pathData="M 54,22 A 32,32 0 1,1 53.9,22 Z"
+        android:strokeWidth="4.5"
         android:strokeLineCap="round"
-        android:strokeWidth="5" />
+        android:fillColor="#00000000">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="22"
+                android:startY="22"
+                android:endX="86"
+                android:endY="86"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#00FFE0" />
+                <item android:offset="0.4" android:color="#00C8FF" />
+                <item android:offset="1.0" android:color="#0052FF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 3. Central Smooth Waveform (Bezier curve) -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M24,56c8,-8 17,-12 28,-12c12,0 23,5 32,14"
-        android:strokeColor="#F8F4EA"
+        android:pathData="M 28,54 C 35,54 37,56.5 42,56.5 C 47,56.5 49,38 54,38 C 59,38 61,56.5 66,56.5 C 71,56.5 73,54 80,54"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.5"
         android:strokeLineCap="round"
-        android:strokeWidth="5" />
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+
+    <!-- 4. Top-Right Orbital Arc & Dots -->
+    <!-- Arc from 290° to 340° (Radius 38) -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M28,69c8,7 17,11 28,11c10,0 19,-3 27,-10"
-        android:strokeColor="#9AD7CF"
+        android:pathData="M 67.0,18.3 A 38,38 0 0,1 89.7,41.0"
+        android:strokeColor="#00C8FF"
+        android:strokeWidth="2.2"
         android:strokeLineCap="round"
-        android:strokeWidth="5" />
+        android:fillColor="#00000000" />
+    <!-- Small Dot (12:30 o'clock) -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M54,34c-11,0 -20,9 -20,20c0,11 9,20 20,20c11,0 20,-9 20,-20c0,-11 -9,-20 -20,-20z"
-        android:strokeColor="#F8F4EA"
-        android:strokeAlpha="0.42"
-        android:strokeWidth="3" />
+        android:pathData="M 57.3,16.1 A 1.5,1.5 0 1,1 57.2,16.1 Z"
+        android:fillColor="#00FFE0" />
+    <!-- Large Dot (2 o'clock) -->
     <path
-        android:fillColor="#ECD7AB"
-        android:pathData="M54,48c4,0 7,3 7,7c0,4 -3,7 -7,7c-4,0 -7,-3 -7,-7c0,-4 3,-7 7,-7z" />
+        android:pathData="M 91.8,50.7 A 2.5,2.5 0 1,1 91.7,50.7 Z"
+        android:fillColor="#00C8FF" />
+
+    <!-- 5. Bottom-Left Orbital Arc & Dots -->
+    <!-- Arc from 110° to 160° (Radius 38) -->
     <path
-        android:fillColor="#0B252B"
-        android:fillAlpha="0.68"
-        android:pathData="M54,51c2,0 4,2 4,4c0,2 -2,4 -4,4c-2,0 -4,-2 -4,-4c0,-2 2,-4 4,-4z" />
+        android:pathData="M 41.0,89.7 A 38,38 0 0,1 18.3,67.0"
+        android:strokeColor="#0052FF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <!-- Small Dot (6:30 o'clock) -->
+    <path
+        android:pathData="M 50.7,91.8 A 1.5,1.5 0 1,1 50.6,91.8 Z"
+        android:fillColor="#0052FF" />
+    <!-- Large Dot (8 o'clock) -->
+    <path
+        android:pathData="M 16.2,57.3 A 2.5,2.5 0 1,1 16.1,57.3 Z"
+        android:fillColor="#00A2FF" />
+
 </vector>
